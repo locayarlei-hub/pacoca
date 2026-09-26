@@ -8,7 +8,8 @@
     <title>Paçoca - Rede Social</title>
 
     <!-- SUPABASE -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+</script>
 
     <style>
         * {
@@ -707,7 +708,39 @@
                 height: 130px;
             }
         }
-    </style>
+    
+/* ===== PAÇOCA 2.0 ===== */
+.profile-cover-wrap{position:relative}.cover{background-size:cover;background-position:center;position:relative}
+.cover-edit{position:absolute;right:12px;bottom:12px}.profile-avatar{overflow:hidden;background-size:cover;background-position:center}
+.profile-avatar img,.avatar img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.profile-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.pacoca-btn{border:0;border-radius:6px;padding:9px 13px;font-weight:700;cursor:pointer;background:var(--pacoca);color:#fff}
+.pacoca-btn.alt{background:#fff;color:var(--marrom);border:1px solid var(--borda)}
+.pacoca-btn.danger{background:var(--vermelho)}
+.profile-editor{display:none;margin-top:14px;padding:14px;background:#faf8f4;border:1px solid var(--borda);border-radius:6px}
+.profile-editor input,.profile-editor textarea,.friend-search input,.chat-input input,.comment-form input{width:100%;padding:10px;border:1px solid var(--borda);border-radius:5px;outline:none}
+.profile-editor textarea{min-height:70px;resize:vertical;margin-top:8px}
+.upload-hidden{display:none}.post-image{width:100%;max-height:560px;object-fit:cover;display:block;border-top:1px solid #eee;border-bottom:1px solid #eee}
+.composer-preview{display:none;margin-top:10px;position:relative}.composer-preview img{max-width:100%;max-height:300px;border-radius:6px}
+.remove-preview{position:absolute;right:6px;top:6px;border:0;border-radius:50%;width:30px;height:30px}
+.post-action.liked{color:#b86d00;background:#fff6e4}.comments-box{padding:10px 14px 14px;border-top:1px solid #eee}
+.comment{display:flex;gap:8px;margin-top:9px}.comment-bubble{background:#f5f1eb;border-radius:10px;padding:8px 10px;flex:1;font-size:13px}
+.comment-form{display:flex;gap:7px;margin-top:10px}.comment-form button{flex:none}
+.friend-search{display:flex;gap:8px;margin-bottom:15px}.friend-search button{flex:none}
+.friend-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.friend-tab{padding:8px 11px;border:1px solid var(--borda);background:#fff;border-radius:5px}.friend-tab.active{background:var(--pacoca-claro);font-weight:bold}
+.person-actions{display:flex;gap:5px;flex-wrap:wrap}.person .avatar{overflow:hidden}
+.badge{display:inline-block;min-width:18px;padding:2px 5px;border-radius:10px;background:var(--vermelho);color:#fff;font-size:10px;text-align:center}
+.chat-layout{display:grid;grid-template-columns:220px 1fr;min-height:480px;background:#fff;border:1px solid var(--borda);border-radius:6px;overflow:hidden}
+.chat-list{border-right:1px solid var(--borda);overflow:auto}.chat-contact{padding:12px;border-bottom:1px solid #eee;cursor:pointer}.chat-contact:hover,.chat-contact.active{background:#faf1df}
+.chat-main{display:flex;flex-direction:column}.chat-head{padding:12px;border-bottom:1px solid var(--borda);font-weight:bold}.chat-messages{flex:1;padding:14px;overflow:auto;max-height:430px}
+.msg{max-width:75%;padding:9px 11px;border-radius:12px;margin:6px 0;background:#eee}.msg.mine{margin-left:auto;background:#f2d79f}.msg-time{font-size:9px;color:#777;margin-top:4px}
+.chat-input{display:flex;gap:7px;padding:10px;border-top:1px solid var(--borda)}.chat-input button{flex:none}
+.notification-item{padding:12px;border-bottom:1px solid #eee}.notification-item.unread{background:#fff9ed}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.photo-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:5px}
+.post-owner-actions{position:relative}.post-menu{display:none;position:absolute;right:0;top:28px;background:#fff;border:1px solid var(--borda);box-shadow:0 4px 14px #0002;z-index:5;min-width:120px}.post-menu button{display:block;width:100%;padding:9px;border:0;background:#fff;text-align:left}
+@media(max-width:700px){.chat-layout{grid-template-columns:1fr}.chat-list{max-height:150px;border-right:0;border-bottom:1px solid var(--borda)}.photo-grid{grid-template-columns:repeat(2,1fr)}}
+
+</style>
 </head>
 
 
@@ -1141,12 +1174,9 @@
 
                         <div class="composer-footer">
 
-                            <button
-                                class="secondary-button"
-                                onclick="mostrarAviso('Upload de fotos será adicionado em seguida.')"
-                            >
-                                📷 Foto
-                            </button>
+                            <button class="secondary-button" type="button" onclick="document.getElementById('postImageInput').click()">📷 Foto</button>
+<input id="postImageInput" class="upload-hidden" type="file" accept="image/*" onchange="prepararFotoPost(this)">
+<div id="postImagePreview" class="composer-preview"><img id="postPreviewImg"><button class="remove-preview" type="button" onclick="removerFotoPost()">✕</button></div>
 
 
                             <button
@@ -1182,7 +1212,11 @@
                 id="page-perfil"
             >
 
-                <div class="cover"></div>
+                <div class="profile-cover-wrap">
+<div class="cover" id="profileCover"></div>
+<button class="pacoca-btn alt cover-edit" type="button" onclick="document.getElementById('coverInput').click()">📷 Alterar capa</button>
+<input id="coverInput" class="upload-hidden" type="file" accept="image/*" onchange="alterarImagemPerfil(this,'cover')">
+</div>
 
 
                 <div class="profile-card">
@@ -1211,9 +1245,17 @@
                     </div>
 
 
-                    <div class="profile-bio">
-                        Bem-vindo ao meu perfil na Paçoca! 🥜
-                    </div>
+                    <div class="profile-bio" id="profileBio">Bem-vindo ao meu perfil na Paçoca! 🥜</div>
+<div class="profile-tools">
+<button class="pacoca-btn alt" type="button" onclick="document.getElementById('avatarInput').click()">📷 Foto de perfil</button>
+<input id="avatarInput" class="upload-hidden" type="file" accept="image/*" onchange="alterarImagemPerfil(this,'avatar')">
+<button class="pacoca-btn" type="button" onclick="alternarEditorPerfil()">✏️ Editar perfil</button>
+</div>
+<div class="profile-editor" id="profileEditor">
+<input id="editName" placeholder="Seu nome">
+<textarea id="editBio" placeholder="Conte um pouco sobre você"></textarea>
+<button class="pacoca-btn" type="button" onclick="salvarPerfil()">Salvar alterações</button>
+</div>
 
                 </div>
 
@@ -1230,191 +1272,40 @@
 
 
             <!-- AMIGOS -->
-
-            <div
-                class="page"
-                id="page-amigos"
-            >
-
-                <h2 class="section-title">
-                    👥 Amigos
-                </h2>
-
-
-                <div class="side-card">
-
-                    <div class="person">
-
-                        <div class="avatar">
-                            JS
-                        </div>
-
-                        <div class="person-info">
-
-                            <div class="person-name">
-                                João Silva
-                            </div>
-
-                            <div class="person-detail">
-                                12 amigos em comum
-                            </div>
-
-                        </div>
-
-                        <button
-                            class="add-button"
-                            onclick="mostrarAviso('Solicitação enviada!')"
-                        >
-                            Adicionar
-                        </button>
-
-                    </div>
-
-
-                    <div class="person">
-
-                        <div class="avatar">
-                            MS
-                        </div>
-
-                        <div class="person-info">
-
-                            <div class="person-name">
-                                Maria Santos
-                            </div>
-
-                            <div class="person-detail">
-                                8 amigos em comum
-                            </div>
-
-                        </div>
-
-                        <button
-                            class="add-button"
-                            onclick="mostrarAviso('Solicitação enviada!')"
-                        >
-                            Adicionar
-                        </button>
-
-                    </div>
-
-
-                    <div class="person">
-
-                        <div class="avatar">
-                            CF
-                        </div>
-
-                        <div class="person-info">
-
-                            <div class="person-name">
-                                Carlos Ferreira
-                            </div>
-
-                            <div class="person-detail">
-                                5 amigos em comum
-                            </div>
-
-                        </div>
-
-                        <button
-                            class="add-button"
-                            onclick="mostrarAviso('Solicitação enviada!')"
-                        >
-                            Adicionar
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- MENSAGENS -->
-
-            <div
-                class="page"
-                id="page-mensagens"
-            >
-
-                <h2 class="section-title">
-                    💬 Mensagens
-                </h2>
-
-
-                <div class="empty">
-
-                    <h3>
-                        Suas mensagens
-                    </h3>
-
-                    <p style="margin-top:8px;">
-                        O sistema de mensagens será conectado ao Supabase.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- NOTIFICAÇÕES -->
-
-            <div
-                class="page"
-                id="page-notificacoes"
-            >
-
-                <h2 class="section-title">
-                    🔔 Notificações
-                </h2>
-
-
-                <div class="side-card">
-
-                    <div class="person">
-                        👍 João curtiu sua publicação.
-                    </div>
-
-                    <div class="person">
-                        💬 Maria comentou na sua publicação.
-                    </div>
-
-                    <div class="person">
-                        👥 Carlos enviou uma solicitação.
-                    </div>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- FOTOS -->
-
-            <div
-                class="page"
-                id="page-fotos"
-            >
-
-                <h2 class="section-title">
-                    📷 Fotos
-                </h2>
-
-
-                <div class="empty">
-
-                    <h3>
-                        Suas fotos aparecerão aqui.
-                    </h3>
-
-                </div>
-
-            </div>
-
-        </section>
+<div class="page" id="page-amigos">
+<h2 class="section-title">👥 Amigos</h2>
+<div class="friend-search"><input id="friendSearch" placeholder="Pesquise por nome ou @usuário" onkeydown="if(event.key==='Enter') pesquisarUsuarios()"><button class="pacoca-btn" onclick="pesquisarUsuarios()">Pesquisar</button></div>
+<div class="friend-tabs">
+<button class="friend-tab active" onclick="carregarAmigos('amigos',this)">Meus amigos</button>
+<button class="friend-tab" onclick="carregarAmigos('recebidas',this)">Solicitações recebidas <span id="friendBadge"></span></button>
+<button class="friend-tab" onclick="carregarAmigos('enviadas',this)">Enviadas</button>
+</div>
+<div id="friendsContent"><div class="empty">Carregando...</div></div>
+</div>
+
+<!-- MENSAGENS -->
+<div class="page" id="page-mensagens">
+<h2 class="section-title">💬 Mensagens</h2>
+<div class="chat-layout">
+<div class="chat-list" id="chatContacts"><div class="empty">Seus amigos aparecerão aqui.</div></div>
+<div class="chat-main">
+<div class="chat-head" id="chatHead">Selecione um amigo</div>
+<div class="chat-messages" id="chatMessages"><div class="empty">Escolha um amigo para começar a conversar.</div></div>
+<div class="chat-input"><input id="messageInput" placeholder="Digite uma mensagem..." onkeydown="if(event.key==='Enter') enviarMensagem()"><button class="pacoca-btn" onclick="enviarMensagem()">Enviar</button></div>
+</div></div></div>
+
+<!-- NOTIFICAÇÕES -->
+<div class="page" id="page-notificacoes">
+<h2 class="section-title">🔔 Notificações</h2>
+<div class="side-card" id="notificationsContent"><div class="empty">Carregando notificações...</div></div>
+</div>
+
+<!-- FOTOS -->
+<div class="page" id="page-fotos">
+<h2 class="section-title">📷 Fotos</h2>
+<div id="photosContent" class="photo-grid"></div>
+</div>
+</section>
 
 
 
@@ -1423,75 +1314,7 @@
         <aside class="right-sidebar">
 
 
-            <div class="side-card">
-
-                <div class="side-title">
-                    👥 Pessoas que talvez você conheça
-                </div>
-
-
-                <div class="person">
-
-                    <div class="avatar">
-                        JS
-                    </div>
-
-                    <div class="person-info">
-
-                        <div class="person-name">
-                            João Silva
-                        </div>
-
-                        <div class="person-detail">
-                            12 amigos
-                        </div>
-
-                    </div>
-
-                    <button
-                        class="add-button"
-                        onclick="mostrarAviso('Solicitação enviada!')"
-                    >
-                        +
-                    </button>
-
-                </div>
-
-
-                <div class="person">
-
-                    <div class="avatar">
-                        MS
-                    </div>
-
-                    <div class="person-info">
-
-                        <div class="person-name">
-                            Maria Santos
-                        </div>
-
-                        <div class="person-detail">
-                            8 amigos
-                        </div>
-
-                    </div>
-
-                    <button
-                        class="add-button"
-                        onclick="mostrarAviso('Solicitação enviada!')"
-                    >
-                        +
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <div class="side-card">
-
-                <div class="side-title">
-                    🥜 Sobre a Paçoca
+            <div class="side-card"><div class="side-title">👥 Pessoas que talvez você conheça</div><div id="suggestionsContent"></div></div><div class="side-card"><div class="side-title">🥜 Sobre a Paçoca
                 </div>
 
                 <div style="
@@ -2865,6 +2688,155 @@
         "DOMContentLoaded",
         iniciarSistema
     );
+
+
+/* ================= PAÇOCA 2.0 ================= */
+var postImageFile=null, chatComUsuario=null, pacocaRealtime=null;
+function avatarHTML(p){ if(p&&p.avatar_url) return `<img src="${escaparHTML(p.avatar_url)}" alt="">`; return escaparHTML(((p&&p.name)||"?").charAt(0).toUpperCase()); }
+async function uploadImagem(file,pasta){
+ if(!file) return null;
+ if(file.size>6*1024*1024){mostrarAviso("A imagem deve ter no máximo 6 MB.");return null;}
+ const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
+ const path=`${usuarioAtual.id}/${pasta}-${Date.now()}.${ext}`;
+ const {error}=await supabaseClient.storage.from("pacoca-media").upload(path,file,{upsert:false,contentType:file.type});
+ if(error){console.error(error);mostrarAviso("Erro ao enviar imagem.");return null;}
+ return supabaseClient.storage.from("pacoca-media").getPublicUrl(path).data.publicUrl;
+}
+function prepararFotoPost(input){postImageFile=input.files&&input.files[0];if(!postImageFile)return;const u=URL.createObjectURL(postImageFile);document.getElementById("postPreviewImg").src=u;document.getElementById("postImagePreview").style.display="block";}
+function removerFotoPost(){postImageFile=null;document.getElementById("postImageInput").value="";document.getElementById("postImagePreview").style.display="none";}
+function alternarEditorPerfil(){const e=document.getElementById("profileEditor");e.style.display=e.style.display==="block"?"none":"block";document.getElementById("editName").value=usuarioAtual.name||"";document.getElementById("editBio").value=usuarioAtual.bio||"";}
+async function salvarPerfil(){
+ const name=document.getElementById("editName").value.trim(),bio=document.getElementById("editBio").value.trim();
+ if(!name)return mostrarAviso("Digite seu nome.");
+ const {error}=await supabaseClient.from("profiles").update({name,bio,updated_at:new Date().toISOString()}).eq("id",usuarioAtual.id);
+ if(error){console.error(error);return mostrarAviso("Não foi possível salvar o perfil.");}
+ usuarioAtual.name=name;usuarioAtual.bio=bio;atualizarInterfaceUsuario();alternarEditorPerfil();mostrarAviso("Perfil atualizado!");
+}
+async function alterarImagemPerfil(input,tipo){
+ const file=input.files&&input.files[0]; if(!file)return;
+ mostrarAviso("Enviando imagem...");
+ const url=await uploadImagem(file,tipo); if(!url)return;
+ const campo=tipo==="avatar"?"avatar_url":"cover_url";
+ const {error}=await supabaseClient.from("profiles").update({[campo]:url,updated_at:new Date().toISOString()}).eq("id",usuarioAtual.id);
+ if(error){console.error(error);return mostrarAviso("Não foi possível atualizar a imagem.");}
+ usuarioAtual[campo]=url;atualizarInterfaceUsuario();mostrarAviso(tipo==="avatar"?"Foto de perfil atualizada!":"Capa atualizada!");
+}
+const _carregarUsuario=carregarUsuario;
+carregarUsuario=async function(){
+ const {data:{user},error}=await supabaseClient.auth.getUser(); if(error||!user){mostrarTelaLogin();return;}
+ let {data:profile}=await supabaseClient.from("profiles").select("*").eq("id",user.id).maybeSingle();
+ if(!profile){const nome=user.user_metadata?.name||user.email.split("@")[0],username=user.user_metadata?.username||user.email.split("@")[0].toLowerCase().replace(/[^a-z0-9_]/g,"");const r=await supabaseClient.from("profiles").upsert({id:user.id,name:nome,username,email:user.email}).select().single();profile=r.data||{id:user.id,name:nome,username,email:user.email};}
+ usuarioAtual={id:user.id,email:user.email,name:profile.name||"Usuário",username:profile.username||"usuario",bio:profile.bio||"",avatar_url:profile.avatar_url||"",cover_url:profile.cover_url||""};
+ atualizarInterfaceUsuario();mostrarAplicacao();await carregarPosts();carregarSugestoes();iniciarRealtime();
+};
+const _atualizarInterfaceUsuario=atualizarInterfaceUsuario;
+atualizarInterfaceUsuario=function(){
+ if(!usuarioAtual)return;
+ const top=document.getElementById("topAvatar"),pa=document.getElementById("profileAvatar");
+ top.innerHTML=avatarHTML(usuarioAtual);pa.innerHTML=avatarHTML(usuarioAtual);
+ document.getElementById("topUserName").textContent=usuarioAtual.name;
+ document.getElementById("profileName").textContent=usuarioAtual.name;
+ document.getElementById("profileHandle").textContent="@"+usuarioAtual.username;
+ document.getElementById("profileBio").textContent=usuarioAtual.bio||"Bem-vindo ao meu perfil na Paçoca! 🥜";
+ const c=document.getElementById("profileCover"); if(c)c.style.backgroundImage=usuarioAtual.cover_url?`url("${usuarioAtual.cover_url}")`:"";
+};
+const _publicarNovoPost=publicarNovoPost;
+publicarNovoPost=async function(){
+ if(!usuarioAtual)return mostrarAviso("Você precisa estar logado.");
+ const ta=document.getElementById("postText"),texto=ta.value.trim();
+ if(!texto&&!postImageFile)return mostrarAviso("Escreva algo ou escolha uma foto.");
+ let image_url=null;if(postImageFile){mostrarAviso("Enviando publicação...");image_url=await uploadImagem(postImageFile,"post");if(!image_url)return;}
+ const {error}=await supabaseClient.from("posts").insert({user_id:usuarioAtual.id,content:texto,name:usuarioAtual.name,handle:"@"+usuarioAtual.username,image_url,created_at:new Date().toISOString()});
+ if(error){console.error(error);return mostrarAviso("Não foi possível publicar.");}
+ ta.value="";removerFotoPost();mostrarAviso("🥜 Publicação criada!");carregarPosts();
+};
+const _carregarPosts=carregarPosts;
+carregarPosts=async function(){
+ const {data:posts,error}=await supabaseClient.from("posts").select("*").order("created_at",{ascending:false});
+ if(error){console.error(error);document.getElementById("feed").innerHTML='<div class="empty">⚠️ Erro ao carregar publicações.</div>';return;}
+ const ids=(posts||[]).map(p=>p.id);
+ let likes=[],comments=[],profiles=[];
+ if(ids.length){likes=(await supabaseClient.from("post_likes").select("*").in("post_id",ids)).data||[];comments=(await supabaseClient.from("comments").select("*").in("post_id",ids).order("created_at",{ascending:true})).data||[];}
+ const uids=[...new Set([...(posts||[]).map(p=>p.user_id),...comments.map(c=>c.user_id)])].filter(Boolean);
+ if(uids.length)profiles=(await supabaseClient.from("profiles").select("id,name,username,avatar_url").in("id",uids)).data||[];
+ const pm=Object.fromEntries(profiles.map(p=>[p.id,p]));
+ window.allPosts=(posts||[]).map(p=>({...p,_likes:likes.filter(l=>l.post_id===p.id),_comments:comments.filter(c=>c.post_id===p.id).map(c=>({...c,_profile:pm[c.user_id]})),_profile:pm[p.user_id]}));
+ renderFeed();if(document.getElementById("page-perfil").classList.contains("active"))renderProfile();
+};
+criarPostHTML=function(post){
+ const p=post._profile||{},nome=p.name||post.name||"Usuário",handle="@"+(p.username||String(post.handle||"usuario").replace(/^@/,""));
+ const likes=post._likes||[],comments=post._comments||[],liked=likes.some(l=>l.user_id===usuarioAtual?.id),owner=post.user_id===usuarioAtual?.id;
+ const img=post.image_url?`<img class="post-image" src="${escaparHTML(post.image_url)}" alt="Foto da publicação">`:"";
+ const cs=comments.map(c=>`<div class="comment"><div class="avatar">${avatarHTML(c._profile)}</div><div class="comment-bubble"><b>${escaparHTML(c._profile?.name||"Usuário")}</b><br>${escaparHTML(c.content||"")}</div></div>`).join("");
+ return `<article class="post" id="post-${post.id}"><div class="post-header"><div class="avatar">${avatarHTML({...p,name})}</div><div class="post-user"><div class="post-name">${escaparHTML(nome)}</div><div class="post-handle">${escaparHTML(handle)} · <span class="post-date">${formatarData(post.created_at)}</span></div></div>${owner?`<div class="post-owner-actions"><button class="post-options" onclick="alternarMenuPost('${post.id}')">⋯</button><div class="post-menu" id="menu-${post.id}"><button onclick="editarPost('${post.id}')">✏️ Editar</button><button onclick="excluirPost('${post.id}')">🗑️ Excluir</button></div></div>`:""}</div><div class="post-content">${escaparHTML(post.content||"")}</div>${img}<div class="post-stats">👍 <span>${likes.length} curtida${likes.length===1?"":"s"}</span> · <span>${comments.length} comentário${comments.length===1?"":"s"}</span></div><div class="post-actions"><button class="post-action ${liked?"liked":""}" onclick="curtirPost('${post.id}')">👍 ${liked?"Curtido":"Curtir"}</button><button class="post-action" onclick="focarComentario('${post.id}')">💬 Comentar</button><button class="post-action" onclick="compartilharPost('${post.id}')">↗ Compartilhar</button></div><div class="comments-box">${cs}<div class="comment-form"><input id="comment-${post.id}" placeholder="Escreva um comentário..." onkeydown="if(event.key==='Enter') comentarPost('${post.id}')"><button class="pacoca-btn" onclick="comentarPost('${post.id}')">Enviar</button></div></div></article>`;
+};
+curtirPost=async function(id){
+ const post=window.allPosts.find(p=>String(p.id)===String(id));const liked=post?._likes?.some(l=>l.user_id===usuarioAtual.id);
+ const r=liked?await supabaseClient.from("post_likes").delete().eq("post_id",id).eq("user_id",usuarioAtual.id):await supabaseClient.from("post_likes").insert({post_id:id,user_id:usuarioAtual.id});
+ if(r.error){console.error(r.error);return mostrarAviso("Não foi possível registrar a curtida.");}carregarPosts();
+};
+function focarComentario(id){document.getElementById("comment-"+id)?.focus();}
+comentarPost=async function(id){const i=document.getElementById("comment-"+id),texto=i?.value.trim();if(!texto)return;const {error}=await supabaseClient.from("comments").insert({post_id:id,user_id:usuarioAtual.id,content:texto});if(error){console.error(error);return mostrarAviso("Não foi possível comentar.");}i.value="";carregarPosts();}
+function alternarMenuPost(id){const m=document.getElementById("menu-"+id);if(m)m.style.display=m.style.display==="block"?"none":"block";}
+async function editarPost(id){const p=window.allPosts.find(x=>String(x.id)===String(id));if(!p)return;const t=prompt("Editar publicação:",p.content||"");if(t===null)return;const {error}=await supabaseClient.from("posts").update({content:t.trim()}).eq("id",id).eq("user_id",usuarioAtual.id);if(error)return mostrarAviso("Não foi possível editar.");carregarPosts();}
+async function excluirPost(id){if(!confirm("Excluir esta publicação?"))return;const {error}=await supabaseClient.from("posts").delete().eq("id",id).eq("user_id",usuarioAtual.id);if(error)return mostrarAviso("Não foi possível excluir.");mostrarAviso("Publicação excluída.");carregarPosts();}
+async function pesquisarUsuarios(){
+ const q=document.getElementById("friendSearch").value.trim().replace(/^@/,"");if(!q)return carregarAmigos("amigos");
+ const {data,error}=await supabaseClient.from("profiles").select("id,name,username,avatar_url,bio").neq("id",usuarioAtual.id).or(`username.ilike.%${q}%,name.ilike.%${q}%`).limit(20);
+ if(error){console.error(error);return mostrarAviso("Erro na pesquisa.");}renderPessoas(data||[],"pesquisa");
+}
+async function statusAmizade(other){
+ const {data}=await supabaseClient.from("friendships").select("*").or(`and(requester_id.eq.${usuarioAtual.id},addressee_id.eq.${other}),and(requester_id.eq.${other},addressee_id.eq.${usuarioAtual.id})`).maybeSingle();return data;
+}
+async function renderPessoas(pessoas,modo){
+ const c=document.getElementById("friendsContent");if(!pessoas.length){c.innerHTML='<div class="empty">Nenhuma pessoa encontrada.</div>';return;}
+ const cards=[];for(const p of pessoas){let f=await statusAmizade(p.id),acoes="";
+ if(!f)acoes=`<button class="pacoca-btn" onclick="enviarAmizade('${p.id}')">Adicionar</button>`;
+ else if(f.status==="accepted")acoes=`<button class="pacoca-btn" onclick="abrirChat('${p.id}','${escaparHTML(p.name)}')">💬 Mensagem</button>`;
+ else if(f.addressee_id===usuarioAtual.id)acoes=`<button class="pacoca-btn" onclick="responderAmizade('${f.id}',true)">Aceitar</button><button class="pacoca-btn alt" onclick="responderAmizade('${f.id}',false)">Recusar</button>`;
+ else acoes=`<button class="pacoca-btn alt" disabled>Solicitação enviada</button>`;
+ cards.push(`<div class="person"><div class="avatar">${avatarHTML(p)}</div><div class="person-info"><div class="person-name">${escaparHTML(p.name||"Usuário")}</div><div class="person-detail">@${escaparHTML(p.username||"usuario")}${p.bio?" · "+escaparHTML(p.bio):""}</div></div><div class="person-actions">${acoes}</div></div>`);}
+ c.innerHTML=`<div class="side-card">${cards.join("")}</div>`;
+}
+async function carregarAmigos(tipo="amigos",btn){
+ if(btn){document.querySelectorAll(".friend-tab").forEach(x=>x.classList.remove("active"));btn.classList.add("active");}
+ const {data,error}=await supabaseClient.from("friendships").select("*").or(`requester_id.eq.${usuarioAtual.id},addressee_id.eq.${usuarioAtual.id}`);
+ if(error){console.error(error);return;}
+ let fs=data||[];if(tipo==="amigos")fs=fs.filter(f=>f.status==="accepted");if(tipo==="recebidas")fs=fs.filter(f=>f.status==="pending"&&f.addressee_id===usuarioAtual.id);if(tipo==="enviadas")fs=fs.filter(f=>f.status==="pending"&&f.requester_id===usuarioAtual.id);
+ const ids=fs.map(f=>f.requester_id===usuarioAtual.id?f.addressee_id:f.requester_id);if(!ids.length){document.getElementById("friendsContent").innerHTML='<div class="empty">Nada por aqui ainda.</div>';return;}
+ const {data:ps}=await supabaseClient.from("profiles").select("id,name,username,avatar_url,bio").in("id",ids);await renderPessoas(ps||[],tipo);
+}
+async function enviarAmizade(id){const {error}=await supabaseClient.from("friendships").insert({requester_id:usuarioAtual.id,addressee_id:id,status:"pending"});if(error){console.error(error);return mostrarAviso("Não foi possível enviar a solicitação.");}mostrarAviso("Solicitação enviada!");pesquisarUsuarios();carregarSugestoes();}
+async function responderAmizade(id,aceitar){const q=aceitar?supabaseClient.from("friendships").update({status:"accepted",responded_at:new Date().toISOString()}).eq("id",id).eq("addressee_id",usuarioAtual.id):supabaseClient.from("friendships").delete().eq("id",id).eq("addressee_id",usuarioAtual.id);const {error}=await q;if(error)return mostrarAviso("Não foi possível responder.");mostrarAviso(aceitar?"Agora vocês são amigos!":"Solicitação recusada.");carregarAmigos("recebidas");carregarSugestoes();}
+async function carregarSugestoes(){
+ if(!usuarioAtual)return;const {data}=await supabaseClient.from("profiles").select("id,name,username,avatar_url").neq("id",usuarioAtual.id).limit(5);const box=document.getElementById("suggestionsContent");if(!box)return;
+ let html="";for(const p of data||[]){const f=await statusAmizade(p.id);if(f)continue;html+=`<div class="person"><div class="avatar">${avatarHTML(p)}</div><div class="person-info"><div class="person-name">${escaparHTML(p.name)}</div><div class="person-detail">@${escaparHTML(p.username)}</div></div><button class="add-button" onclick="enviarAmizade('${p.id}')">+</button></div>`;}box.innerHTML=html||'<div style="padding:12px;color:#777">Sem novas sugestões.</div>';
+ const {data:pend}=await supabaseClient.from("friendships").select("id").eq("addressee_id",usuarioAtual.id).eq("status","pending");document.getElementById("friendBadge").innerHTML=pend?.length?`<span class="badge">${pend.length}</span>`:"";
+}
+async function contatosChat(){
+ const {data}=await supabaseClient.from("friendships").select("*").eq("status","accepted").or(`requester_id.eq.${usuarioAtual.id},addressee_id.eq.${usuarioAtual.id}`);const ids=(data||[]).map(f=>f.requester_id===usuarioAtual.id?f.addressee_id:f.requester_id);
+ const {data:ps}=ids.length?await supabaseClient.from("profiles").select("id,name,username,avatar_url").in("id",ids):{data:[]};const box=document.getElementById("chatContacts");box.innerHTML=(ps||[]).map(p=>`<div class="chat-contact" onclick="abrirChat('${p.id}','${escaparHTML(p.name)}')"><b>${escaparHTML(p.name)}</b><br><small>@${escaparHTML(p.username)}</small></div>`).join("")||'<div class="empty">Adicione amigos para conversar.</div>';
+}
+async function abrirChat(id,nome){chatComUsuario=id;mostrarPagina("mensagens");document.getElementById("chatHead").textContent=nome||"Conversa";await carregarMensagens();}
+async function carregarMensagens(){
+ if(!chatComUsuario)return contatosChat();const {data,error}=await supabaseClient.from("messages").select("*").or(`and(sender_id.eq.${usuarioAtual.id},receiver_id.eq.${chatComUsuario}),and(sender_id.eq.${chatComUsuario},receiver_id.eq.${usuarioAtual.id})`).order("created_at",{ascending:true});
+ if(error){console.error(error);return;}const box=document.getElementById("chatMessages");box.innerHTML=(data||[]).map(m=>`<div class="msg ${m.sender_id===usuarioAtual.id?"mine":""}">${escaparHTML(m.content)}<div class="msg-time">${formatarData(m.created_at)}</div></div>`).join("")||'<div class="empty">Nenhuma mensagem ainda. Diga oi! 👋</div>';box.scrollTop=box.scrollHeight;
+ await supabaseClient.from("messages").update({read_at:new Date().toISOString()}).eq("sender_id",chatComUsuario).eq("receiver_id",usuarioAtual.id).is("read_at",null);
+}
+async function enviarMensagem(){if(!chatComUsuario)return mostrarAviso("Selecione um amigo.");const i=document.getElementById("messageInput"),t=i.value.trim();if(!t)return;const {error}=await supabaseClient.from("messages").insert({sender_id:usuarioAtual.id,receiver_id:chatComUsuario,content:t});if(error){console.error(error);return mostrarAviso("Não foi possível enviar.");}i.value="";carregarMensagens();}
+async function carregarNotificacoes(){
+ const {data:fs}=await supabaseClient.from("friendships").select("id,requester_id,created_at,status").eq("addressee_id",usuarioAtual.id).order("created_at",{ascending:false}).limit(20);
+ const ids=[...new Set((fs||[]).map(f=>f.requester_id))];const {data:ps}=ids.length?await supabaseClient.from("profiles").select("id,name").in("id",ids):{data:[]};const pm=Object.fromEntries((ps||[]).map(p=>[p.id,p]));
+ const box=document.getElementById("notificationsContent");box.innerHTML=(fs||[]).map(f=>`<div class="notification-item">👥 <b>${escaparHTML(pm[f.requester_id]?.name||"Alguém")}</b> ${f.status==="pending"?"enviou uma solicitação de amizade.":"agora é seu amigo."}<br><small>${formatarData(f.created_at)}</small></div>`).join("")||'<div class="empty">Nenhuma notificação.</div>';
+}
+function carregarFotos(){const imgs=window.allPosts.filter(p=>p.image_url);document.getElementById("photosContent").innerHTML=imgs.map(p=>`<img src="${escaparHTML(p.image_url)}" alt="Foto">`).join("")||'<div class="empty" style="grid-column:1/-1">Nenhuma foto publicada ainda.</div>';}
+const _mostrarPagina=mostrarPagina;
+mostrarPagina=function(pagina){_mostrarPagina(pagina);if(pagina==="amigos")carregarAmigos();if(pagina==="mensagens")contatosChat();if(pagina==="notificacoes")carregarNotificacoes();if(pagina==="fotos")carregarFotos();};
+function iniciarRealtime(){
+ if(pacocaRealtime)supabaseClient.removeChannel(pacocaRealtime);
+ pacocaRealtime=supabaseClient.channel("pacoca-live").on("postgres_changes",{event:"*",schema:"public",table:"messages"},()=>{if(document.getElementById("page-mensagens").classList.contains("active"))carregarMensagens();}).on("postgres_changes",{event:"*",schema:"public",table:"friendships"},()=>{carregarSugestoes();if(document.getElementById("page-amigos").classList.contains("active"))carregarAmigos();}).on("postgres_changes",{event:"*",schema:"public",table:"posts"},()=>carregarPosts()).subscribe();
+}
+
 
 </script>
 
