@@ -1,0 +1,2872 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Paçoca - Rede Social</title>
+
+    <!-- SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --marrom: #5b3a20;
+            --marrom-escuro: #402714;
+            --pacoca: #d99a32;
+            --pacoca-claro: #f5dfb1;
+            --fundo: #f2eee8;
+            --branco: #ffffff;
+            --borda: #d9d2c8;
+            --texto: #292929;
+            --cinza: #777;
+            --azul: #4267a9;
+            --vermelho: #c0392b;
+            --verde: #2e8b57;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--fundo);
+            color: var(--texto);
+        }
+
+        button,
+        input,
+        textarea {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        /* ==========================================
+           LOGIN / CADASTRO
+        ========================================== */
+
+        #authScreen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+
+            background:
+                radial-gradient(
+                    circle at 20% 10%,
+                    #f4d89b,
+                    transparent 35%
+                ),
+                linear-gradient(
+                    135deg,
+                    #f5efe5,
+                    #eadbc1
+                );
+        }
+
+        .auth-box {
+            width: 420px;
+            max-width: 100%;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 15px 50px rgba(60, 35, 10, .18);
+            border: 1px solid var(--borda);
+        }
+
+        .auth-header {
+            background: var(--marrom);
+            color: white;
+            padding: 28px 25px;
+            text-align: center;
+        }
+
+        .auth-logo {
+            font-size: 38px;
+            font-weight: bold;
+            color: #ffe2a0;
+        }
+
+        .auth-subtitle {
+            margin-top: 7px;
+            color: #e9dbc5;
+        }
+
+        .auth-body {
+            padding: 25px;
+        }
+
+        .auth-title {
+            font-size: 22px;
+            color: var(--marrom);
+            margin-bottom: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            border: 1px solid var(--borda);
+            padding: 11px;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: var(--pacoca);
+        }
+
+        .auth-button {
+            width: 100%;
+            border: none;
+            background: var(--pacoca);
+            color: white;
+            padding: 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 15px;
+            margin-top: 5px;
+        }
+
+        .auth-button:hover {
+            background: #bd7f1f;
+        }
+
+        .auth-link {
+            text-align: center;
+            margin-top: 18px;
+            color: var(--azul);
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+
+        .auth-error {
+            display: none;
+            background: #fbe8e6;
+            border: 1px solid #efb4af;
+            color: var(--vermelho);
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 14px;
+            font-size: 13px;
+        }
+
+        .auth-success {
+            display: none;
+            background: #e7f5ec;
+            border: 1px solid #b6ddc3;
+            color: var(--verde);
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 14px;
+            font-size: 13px;
+        }
+
+        .password-help {
+            font-size: 11px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        /* ==========================================
+           APLICAÇÃO
+        ========================================== */
+
+        #app {
+            display: none;
+        }
+
+        .topbar {
+            height: 58px;
+            background: var(--marrom);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,.2);
+        }
+
+        .topbar-content {
+            max-width: 1200px;
+            height: 100%;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffe2a0;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .logo span {
+            font-size: 27px;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 420px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 9px 13px;
+            border: none;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .top-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .top-button {
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 18px;
+            width: 38px;
+            height: 38px;
+            border-radius: 4px;
+        }
+
+        .top-button:hover {
+            background: rgba(255,255,255,.12);
+        }
+
+        .user-mini {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--pacoca);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        /* ==========================================
+           LAYOUT
+        ========================================== */
+
+        .layout {
+            width: 1200px;
+            max-width: calc(100% - 30px);
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: 210px minmax(400px, 650px) 260px;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .sidebar,
+        .right-sidebar {
+            position: sticky;
+            top: 78px;
+        }
+
+        /* ==========================================
+           MENU
+        ========================================== */
+
+        .menu {
+            background: white;
+            border: 1px solid var(--borda);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .menu-title {
+            padding: 12px;
+            background: var(--pacoca-claro);
+            color: var(--marrom);
+            font-weight: bold;
+            border-bottom: 1px solid var(--borda);
+        }
+
+        .menu-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #444;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            background: #faf7f2;
+        }
+
+        .menu-item.active {
+            background: #f0dfbc;
+            border-left: 4px solid var(--pacoca);
+            font-weight: bold;
+            color: var(--marrom);
+        }
+
+        /* ==========================================
+           PÁGINAS
+        ========================================== */
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* ==========================================
+           PUBLICAÇÃO
+        ========================================== */
+
+        .composer {
+            background: white;
+            border: 1px solid var(--borda);
+            border-radius: 5px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .composer-title {
+            padding: 13px;
+            background: #faf8f4;
+            color: var(--marrom);
+            font-weight: bold;
+            border-bottom: 1px solid var(--borda);
+        }
+
+        .composer-body {
+            padding: 15px;
+        }
+
+        .composer textarea {
+            width: 100%;
+            min-height: 90px;
+            border: 1px solid var(--borda);
+            border-radius: 4px;
+            padding: 12px;
+            resize: vertical;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .composer textarea:focus {
+            border-color: var(--pacoca);
+        }
+
+        .composer-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .secondary-button {
+            background: white;
+            border: 1px solid var(--borda);
+            padding: 8px 11px;
+            border-radius: 4px;
+            color: #666;
+        }
+
+        .publish-button {
+            background: var(--pacoca);
+            color: white;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .publish-button:hover {
+            background: #bd7f1f;
+        }
+
+        /* ==========================================
+           POST
+        ========================================== */
+
+        .post {
+            background: white;
+            border: 1px solid var(--borda);
+            border-radius: 5px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px;
+        }
+
+        .post-user {
+            flex: 1;
+        }
+
+        .post-name {
+            font-weight: bold;
+        }
+
+        .post-handle {
+            font-size: 12px;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        .post-content {
+            padding: 0 15px 15px;
+            line-height: 1.55;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .post-date {
+            color: #999;
+            font-size: 11px;
+        }
+
+        .post-options {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #888;
+        }
+
+        .post-stats {
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+            padding: 8px 15px;
+            color: #777;
+            font-size: 12px;
+        }
+
+        .post-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .post-action {
+            border: none;
+            background: white;
+            padding: 10px;
+            color: #666;
+            font-weight: bold;
+        }
+
+        .post-action:hover {
+            background: #faf7f2;
+        }
+
+        /* ==========================================
+           DIREITA
+        ========================================== */
+
+        .side-card {
+            background: white;
+            border: 1px solid var(--borda);
+            border-radius: 5px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .side-title {
+            padding: 12px;
+            background: #faf8f4;
+            border-bottom: 1px solid var(--borda);
+            font-weight: bold;
+            color: var(--marrom);
+        }
+
+        .person {
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .person-info {
+            flex: 1;
+        }
+
+        .person-name {
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .person-detail {
+            color: #888;
+            font-size: 11px;
+        }
+
+        .add-button {
+            border: 1px solid var(--borda);
+            background: white;
+            padding: 5px 8px;
+            border-radius: 4px;
+        }
+
+        /* ==========================================
+           PERFIL
+        ========================================== */
+
+        .cover {
+            height: 180px;
+            background: linear-gradient(
+                120deg,
+                #4c301b,
+                #d99a32
+            );
+            border-radius: 5px 5px 0 0;
+        }
+
+        .profile-card {
+            background: white;
+            border: 1px solid var(--borda);
+            padding: 0 20px 20px;
+            margin-bottom: 15px;
+        }
+
+        .profile-avatar {
+            width: 105px;
+            height: 105px;
+            border-radius: 50%;
+            background: var(--pacoca);
+            color: white;
+            border: 5px solid white;
+            margin-top: -52px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: bold;
+        }
+
+        .profile-name {
+            font-size: 25px;
+            margin-top: 8px;
+            font-weight: bold;
+        }
+
+        .profile-handle {
+            color: #888;
+            margin-top: 3px;
+        }
+
+        .profile-bio {
+            color: #555;
+            margin-top: 12px;
+        }
+
+        /* ==========================================
+           LISTAS
+        ========================================== */
+
+        .section-title {
+            color: var(--marrom);
+            font-size: 21px;
+            margin-bottom: 15px;
+        }
+
+        .empty {
+            background: white;
+            border: 1px solid var(--borda);
+            padding: 35px;
+            text-align: center;
+            border-radius: 5px;
+            color: #777;
+        }
+
+        /* ==========================================
+           TOAST
+        ========================================== */
+
+        #toast {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            background: var(--marrom);
+            color: white;
+            padding: 13px 18px;
+            border-radius: 5px;
+            opacity: 0;
+            transform: translateY(100px);
+            transition: .25s;
+            z-index: 9999;
+            box-shadow: 0 5px 20px rgba(0,0,0,.25);
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ==========================================
+           RESPONSIVO
+        ========================================== */
+
+        @media (max-width: 1000px) {
+
+            .layout {
+                grid-template-columns: 180px 1fr;
+            }
+
+            .right-sidebar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 700px) {
+
+            .topbar-content {
+                padding: 0 8px;
+            }
+
+            .logo {
+                font-size: 19px;
+            }
+
+            .search-box {
+                display: none;
+            }
+
+            .user-mini span {
+                display: none;
+            }
+
+            .layout {
+                display: block;
+                max-width: calc(100% - 12px);
+                margin-top: 10px;
+            }
+
+            .sidebar {
+                position: static;
+                margin-bottom: 10px;
+            }
+
+            .menu {
+                display: flex;
+                overflow-x: auto;
+            }
+
+            .menu-title {
+                display: none;
+            }
+
+            .menu-item {
+                white-space: nowrap;
+                border-bottom: none;
+            }
+
+            .cover {
+                height: 130px;
+            }
+        }
+    </style>
+</head>
+
+
+<body>
+
+
+<!-- ==========================================================
+     TELA DE AUTENTICAÇÃO
+========================================================== -->
+
+<div id="authScreen">
+
+    <div class="auth-box">
+
+        <div class="auth-header">
+
+            <div class="auth-logo">
+                🥜 PAÇOCA
+            </div>
+
+            <div class="auth-subtitle">
+                A rede social do seu jeito.
+            </div>
+
+        </div>
+
+
+        <!-- LOGIN -->
+
+        <div
+            class="auth-body"
+            id="loginForm"
+        >
+
+            <div class="auth-title">
+                Entrar
+            </div>
+
+            <div
+                class="auth-error"
+                id="loginError"
+            ></div>
+
+            <div class="form-group">
+
+                <label>
+                    E-mail
+                </label>
+
+                <input
+                    type="email"
+                    id="loginEmail"
+                    placeholder="seu@email.com"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Senha
+                </label>
+
+                <input
+                    type="password"
+                    id="loginPassword"
+                    placeholder="Sua senha"
+                    onkeydown="if(event.key === 'Enter') fazerLogin()"
+                >
+
+            </div>
+
+
+            <button
+                class="auth-button"
+                type="button"
+                onclick="fazerLogin()"
+            >
+                ENTRAR
+            </button>
+
+
+            <div
+                class="auth-link"
+                onclick="mostrarCadastro()"
+            >
+                Ainda não tenho uma conta
+            </div>
+
+        </div>
+
+
+        <!-- CADASTRO -->
+
+        <div
+            class="auth-body"
+            id="registerForm"
+            style="display:none;"
+        >
+
+            <div class="auth-title">
+                Criar conta
+            </div>
+
+
+            <div
+                class="auth-error"
+                id="registerError"
+            ></div>
+
+
+            <div
+                class="auth-success"
+                id="registerSuccess"
+            ></div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Nome
+                </label>
+
+                <input
+                    type="text"
+                    id="registerName"
+                    placeholder="Seu nome"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Nome de usuário
+                </label>
+
+                <input
+                    type="text"
+                    id="registerUsername"
+                    placeholder="seuusuario"
+                >
+
+                <div class="password-help">
+                    Use apenas letras, números e _
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    E-mail
+                </label>
+
+                <input
+                    type="email"
+                    id="registerEmail"
+                    placeholder="seu@email.com"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Senha
+                </label>
+
+                <input
+                    type="password"
+                    id="registerPassword"
+                    placeholder="Crie uma senha"
+                >
+
+                <div class="password-help">
+                    Mínimo recomendado: 6 caracteres.
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Confirmar senha
+                </label>
+
+                <input
+                    type="password"
+                    id="registerPasswordConfirm"
+                    placeholder="Digite a senha novamente"
+                >
+
+            </div>
+
+
+            <button
+                class="auth-button"
+                type="button"
+                onclick="criarConta()"
+            >
+                CRIAR MINHA CONTA
+            </button>
+
+
+            <div
+                class="auth-link"
+                onclick="mostrarLogin()"
+            >
+                Já tenho uma conta
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ==========================================================
+     APLICAÇÃO
+========================================================== -->
+
+<div id="app">
+
+
+    <!-- TOPO -->
+
+    <header class="topbar">
+
+        <div class="topbar-content">
+
+
+            <div
+                class="logo"
+                onclick="mostrarPagina('feed')"
+            >
+                <span>🥜</span>
+                PAÇOCA
+            </div>
+
+
+            <div class="search-box">
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Pesquisar..."
+                    oninput="pesquisarPosts(this.value)"
+                >
+
+            </div>
+
+
+            <div class="top-actions">
+
+                <button
+                    class="top-button"
+                    onclick="mostrarPagina('feed')"
+                    title="Início"
+                >
+                    🏠
+                </button>
+
+
+                <button
+                    class="top-button"
+                    onclick="mostrarPagina('amigos')"
+                    title="Amigos"
+                >
+                    👥
+                </button>
+
+
+                <button
+                    class="top-button"
+                    onclick="mostrarPagina('mensagens')"
+                    title="Mensagens"
+                >
+                    💬
+                </button>
+
+
+                <button
+                    class="top-button"
+                    onclick="mostrarPagina('notificacoes')"
+                    title="Notificações"
+                >
+                    🔔
+                </button>
+
+
+                <div
+                    class="user-mini"
+                    onclick="mostrarPagina('perfil')"
+                >
+
+                    <div
+                        class="avatar"
+                        id="topAvatar"
+                    >
+                        ?
+                    </div>
+
+                    <span id="topUserName">
+                        Usuário
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- LAYOUT -->
+
+    <main class="layout">
+
+
+        <!-- MENU ESQUERDO -->
+
+        <aside class="sidebar">
+
+            <div class="menu">
+
+                <div class="menu-title">
+                    MENU
+                </div>
+
+
+                <div
+                    class="menu-item active"
+                    id="menu-feed"
+                    onclick="mostrarPagina('feed')"
+                >
+                    🏠 Início
+                </div>
+
+
+                <div
+                    class="menu-item"
+                    id="menu-perfil"
+                    onclick="mostrarPagina('perfil')"
+                >
+                    👤 Meu perfil
+                </div>
+
+
+                <div
+                    class="menu-item"
+                    onclick="mostrarPagina('amigos')"
+                >
+                    👥 Amigos
+                </div>
+
+
+                <div
+                    class="menu-item"
+                    onclick="mostrarPagina('mensagens')"
+                >
+                    💬 Mensagens
+                </div>
+
+
+                <div
+                    class="menu-item"
+                    onclick="mostrarPagina('notificacoes')"
+                >
+                    🔔 Notificações
+                </div>
+
+
+                <div
+                    class="menu-item"
+                    onclick="mostrarPagina('fotos')"
+                >
+                    📷 Fotos
+                </div>
+
+
+                <div
+                    class="menu-item"
+                    onclick="fazerLogout()"
+                >
+                    🚪 Sair
+                </div>
+
+            </div>
+
+        </aside>
+
+
+
+        <!-- CONTEÚDO -->
+
+        <section>
+
+
+            <!-- FEED -->
+
+            <div
+                class="page active"
+                id="page-feed"
+            >
+
+
+                <div class="composer">
+
+                    <div class="composer-title">
+                        🥜 Compartilhe alguma coisa
+                    </div>
+
+
+                    <div class="composer-body">
+
+                        <textarea
+                            id="postText"
+                            placeholder="No que você está pensando?"
+                        ></textarea>
+
+
+                        <div class="composer-footer">
+
+                            <button
+                                class="secondary-button"
+                                onclick="mostrarAviso('Upload de fotos será adicionado em seguida.')"
+                            >
+                                📷 Foto
+                            </button>
+
+
+                            <button
+                                class="publish-button"
+                                onclick="publicarNovoPost()"
+                            >
+                                PUBLICAR
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div id="feed">
+
+                    <div class="empty">
+                        Carregando publicações...
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- PERFIL -->
+
+            <div
+                class="page"
+                id="page-perfil"
+            >
+
+                <div class="cover"></div>
+
+
+                <div class="profile-card">
+
+                    <div
+                        class="profile-avatar"
+                        id="profileAvatar"
+                    >
+                        ?
+                    </div>
+
+
+                    <div
+                        class="profile-name"
+                        id="profileName"
+                    >
+                        Usuário
+                    </div>
+
+
+                    <div
+                        class="profile-handle"
+                        id="profileHandle"
+                    >
+                        @usuario
+                    </div>
+
+
+                    <div class="profile-bio">
+                        Bem-vindo ao meu perfil na Paçoca! 🥜
+                    </div>
+
+                </div>
+
+
+                <h2 class="section-title">
+                    Minhas publicações
+                </h2>
+
+
+                <div id="profilePosts"></div>
+
+            </div>
+
+
+
+            <!-- AMIGOS -->
+
+            <div
+                class="page"
+                id="page-amigos"
+            >
+
+                <h2 class="section-title">
+                    👥 Amigos
+                </h2>
+
+
+                <div class="side-card">
+
+                    <div class="person">
+
+                        <div class="avatar">
+                            JS
+                        </div>
+
+                        <div class="person-info">
+
+                            <div class="person-name">
+                                João Silva
+                            </div>
+
+                            <div class="person-detail">
+                                12 amigos em comum
+                            </div>
+
+                        </div>
+
+                        <button
+                            class="add-button"
+                            onclick="mostrarAviso('Solicitação enviada!')"
+                        >
+                            Adicionar
+                        </button>
+
+                    </div>
+
+
+                    <div class="person">
+
+                        <div class="avatar">
+                            MS
+                        </div>
+
+                        <div class="person-info">
+
+                            <div class="person-name">
+                                Maria Santos
+                            </div>
+
+                            <div class="person-detail">
+                                8 amigos em comum
+                            </div>
+
+                        </div>
+
+                        <button
+                            class="add-button"
+                            onclick="mostrarAviso('Solicitação enviada!')"
+                        >
+                            Adicionar
+                        </button>
+
+                    </div>
+
+
+                    <div class="person">
+
+                        <div class="avatar">
+                            CF
+                        </div>
+
+                        <div class="person-info">
+
+                            <div class="person-name">
+                                Carlos Ferreira
+                            </div>
+
+                            <div class="person-detail">
+                                5 amigos em comum
+                            </div>
+
+                        </div>
+
+                        <button
+                            class="add-button"
+                            onclick="mostrarAviso('Solicitação enviada!')"
+                        >
+                            Adicionar
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- MENSAGENS -->
+
+            <div
+                class="page"
+                id="page-mensagens"
+            >
+
+                <h2 class="section-title">
+                    💬 Mensagens
+                </h2>
+
+
+                <div class="empty">
+
+                    <h3>
+                        Suas mensagens
+                    </h3>
+
+                    <p style="margin-top:8px;">
+                        O sistema de mensagens será conectado ao Supabase.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- NOTIFICAÇÕES -->
+
+            <div
+                class="page"
+                id="page-notificacoes"
+            >
+
+                <h2 class="section-title">
+                    🔔 Notificações
+                </h2>
+
+
+                <div class="side-card">
+
+                    <div class="person">
+                        👍 João curtiu sua publicação.
+                    </div>
+
+                    <div class="person">
+                        💬 Maria comentou na sua publicação.
+                    </div>
+
+                    <div class="person">
+                        👥 Carlos enviou uma solicitação.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- FOTOS -->
+
+            <div
+                class="page"
+                id="page-fotos"
+            >
+
+                <h2 class="section-title">
+                    📷 Fotos
+                </h2>
+
+
+                <div class="empty">
+
+                    <h3>
+                        Suas fotos aparecerão aqui.
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- DIREITA -->
+
+        <aside class="right-sidebar">
+
+
+            <div class="side-card">
+
+                <div class="side-title">
+                    👥 Pessoas que talvez você conheça
+                </div>
+
+
+                <div class="person">
+
+                    <div class="avatar">
+                        JS
+                    </div>
+
+                    <div class="person-info">
+
+                        <div class="person-name">
+                            João Silva
+                        </div>
+
+                        <div class="person-detail">
+                            12 amigos
+                        </div>
+
+                    </div>
+
+                    <button
+                        class="add-button"
+                        onclick="mostrarAviso('Solicitação enviada!')"
+                    >
+                        +
+                    </button>
+
+                </div>
+
+
+                <div class="person">
+
+                    <div class="avatar">
+                        MS
+                    </div>
+
+                    <div class="person-info">
+
+                        <div class="person-name">
+                            Maria Santos
+                        </div>
+
+                        <div class="person-detail">
+                            8 amigos
+                        </div>
+
+                    </div>
+
+                    <button
+                        class="add-button"
+                        onclick="mostrarAviso('Solicitação enviada!')"
+                    >
+                        +
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="side-card">
+
+                <div class="side-title">
+                    🥜 Sobre a Paçoca
+                </div>
+
+                <div style="
+                    padding:14px;
+                    color:#777;
+                    font-size:12px;
+                    line-height:1.5;
+                ">
+                    Uma rede social simples,
+                    nostálgica e feita para conectar
+                    pessoas.
+                </div>
+
+            </div>
+
+        </aside>
+
+    </main>
+
+</div>
+
+
+<div id="toast"></div>
+
+
+
+<!-- ==========================================================
+     JAVASCRIPT
+========================================================== -->
+
+<script>
+
+    /* ==========================================================
+       SUPABASE
+    ========================================================== */
+
+    // Configuração global segura para Live Server / Live Reload.
+    // O cliente fica em window para evitar erro de redeclaração ao recarregar.
+    window.PACOCA_SUPABASE_URL =
+        window.PACOCA_SUPABASE_URL ||
+        'https://gxpsvwpqqlhwxmdkstak.supabase.co';
+
+    window.PACOCA_SUPABASE_ANON_KEY =
+        window.PACOCA_SUPABASE_ANON_KEY ||
+        'sb_publishable_pwBJIhUUVT1hTke_fWh3hw_PLz5CMGw';
+
+    window.pacocaSupabase =
+        window.pacocaSupabase ||
+        window.supabase.createClient(
+            window.PACOCA_SUPABASE_URL,
+            window.PACOCA_SUPABASE_ANON_KEY
+        );
+
+    var supabaseClient = window.pacocaSupabase;
+
+
+    /* ==========================================================
+       VARIÁVEIS
+    ========================================================== */
+
+    var usuarioAtual = window.usuarioAtual || null;
+
+    window.allPosts = window.allPosts || [];
+
+
+    /* ==========================================================
+       MENSAGENS
+    ========================================================== */
+
+    function mostrarErro(id, mensagem) {
+
+        const elemento =
+            document.getElementById(id);
+
+        elemento.textContent = mensagem;
+
+        elemento.style.display = "block";
+
+    }
+
+
+    function esconderMensagem(id) {
+
+        document.getElementById(id)
+            .style.display = "none";
+
+    }
+
+
+    function mostrarAviso(mensagem) {
+
+        const toast =
+            document.getElementById("toast");
+
+        toast.textContent = mensagem;
+
+        toast.classList.add("show");
+
+        setTimeout(() => {
+
+            toast.classList.remove("show");
+
+        }, 3000);
+
+    }
+
+
+    /* ==========================================================
+       ALTERNAR LOGIN / CADASTRO
+    ========================================================== */
+
+    function mostrarCadastro() {
+
+        document.getElementById(
+            "loginForm"
+        ).style.display = "none";
+
+        document.getElementById(
+            "registerForm"
+        ).style.display = "block";
+
+        esconderMensagem("loginError");
+
+    }
+
+
+    function mostrarLogin() {
+
+        document.getElementById(
+            "registerForm"
+        ).style.display = "none";
+
+        document.getElementById(
+            "loginForm"
+        ).style.display = "block";
+
+        esconderMensagem("registerError");
+
+        esconderMensagem("registerSuccess");
+
+    }
+
+
+    /* ==========================================================
+       CADASTRO
+    ========================================================== */
+
+    async function criarConta() {
+
+        const errorBox = document.getElementById("registerError");
+        const successBox = document.getElementById("registerSuccess");
+        const botao = document.querySelector('#registerForm button[onclick="criarConta()"]');
+
+        esconderMensagem("registerError");
+        esconderMensagem("registerSuccess");
+
+        try {
+            const nome = document.getElementById("registerName").value.trim();
+            const username = document.getElementById("registerUsername").value.trim().toLowerCase();
+            const email = document.getElementById("registerEmail").value.trim();
+            const senha = document.getElementById("registerPassword").value;
+            const confirmar = document.getElementById("registerPasswordConfirm").value;
+
+            if (!nome) return mostrarErro("registerError", "Digite seu nome.");
+            if (!username) return mostrarErro("registerError", "Digite um nome de usuário.");
+            if (!/^[a-z0-9_]+$/.test(username)) {
+                return mostrarErro("registerError", "O usuário deve conter apenas letras, números e _.");
+            }
+            if (!email) return mostrarErro("registerError", "Digite seu e-mail.");
+            if (senha.length < 6) return mostrarErro("registerError", "A senha precisa ter pelo menos 6 caracteres.");
+            if (senha !== confirmar) return mostrarErro("registerError", "As senhas não são iguais.");
+
+            if (botao) {
+                botao.disabled = true;
+                botao.textContent = "CRIANDO CONTA...";
+            }
+
+            // O cadastro da conta é feito diretamente pelo Supabase Auth.
+            // A existência do username é verificada apenas se a tabela estiver disponível.
+            const { data: existente, error: usernameError } = await supabaseClient
+                .from("profiles")
+                .select("id")
+                .eq("username", username)
+                .maybeSingle();
+
+            if (usernameError) {
+                console.warn("Não foi possível verificar o usuário antes do cadastro. O Auth continuará normalmente.", usernameError);
+            }
+
+            if (existente) {
+                mostrarErro("registerError", "Esse nome de usuário já está sendo utilizado.");
+                return;
+            }
+
+            const { data, error } = await supabaseClient.auth.signUp({
+                email,
+                password: senha,
+                options: {
+                    data: {
+                        name: nome,
+                        username: username
+                    }
+                }
+            });
+
+            if (error) {
+                console.error("Erro no cadastro:", error);
+                mostrarErro("registerError", traduzirErroSupabase(error.message));
+                return;
+            }
+
+            if (!data || !data.user) {
+                mostrarErro("registerError", "O Supabase não retornou o usuário criado.");
+                return;
+            }
+
+            // Se a confirmação de e-mail estiver desligada, já existe uma sessão.
+            // Nesse caso, criamos também o perfil.
+            if (data.session) {
+                const { error: perfilError } = await supabaseClient
+                    .from("profiles")
+                    .insert({
+                        id: data.user.id,
+                        name: nome,
+                        username: username,
+                        email: email
+                    });
+
+                if (perfilError) {
+                    console.error("Conta criada, mas houve erro ao salvar o perfil:", perfilError);
+                    mostrarErro("registerError", "A conta foi criada, mas o perfil não pôde ser salvo. Verifique a tabela profiles e as políticas RLS.");
+                    return;
+                }
+
+                await carregarUsuario();
+                mostrarAviso("🥜 Conta criada com sucesso!");
+                return;
+            }
+
+            // Se a confirmação de e-mail estiver ligada.
+            successBox.textContent = "Conta criada! Verifique seu e-mail para confirmar o cadastro. Depois volte e faça login.";
+            successBox.style.display = "block";
+
+        } catch (erro) {
+            console.error("Erro inesperado no cadastro:", erro);
+            mostrarErro("registerError", "Não foi possível concluir o cadastro. Abra o Console (F12) para ver o erro detalhado.");
+        } finally {
+            if (botao) {
+                botao.disabled = false;
+                botao.textContent = "CRIAR MINHA CONTA";
+            }
+        }
+    }
+
+
+
+    /* ==========================================================
+       LOGIN
+    ========================================================== */
+
+    async function fazerLogin() {
+
+    esconderMensagem("loginError");
+
+
+    const email =
+        document.getElementById("loginEmail")
+            .value
+            .trim();
+
+
+    const password =
+        document.getElementById("loginPassword")
+            .value;
+
+
+    if (!email || !password) {
+
+        mostrarErro(
+            "loginError",
+            "Informe seu e-mail e senha."
+        );
+
+        return;
+    }
+
+
+    const {
+        data,
+        error
+    } = await supabaseClient.auth.signInWithPassword({
+
+        email: email,
+
+        password: password
+
+    });
+
+
+    if (error) {
+
+        console.error(
+            "Erro no login:",
+            error
+        );
+
+        mostrarErro(
+            "loginError",
+            traduzirErroSupabase(
+                error.message
+            )
+        );
+
+        return;
+    }
+
+
+    if (!data.user) {
+
+        mostrarErro(
+            "loginError",
+            "Não foi possível localizar sua conta."
+        );
+
+        return;
+    }
+
+
+    /*
+     * Login realizado.
+     */
+
+    await carregarUsuario();
+
+}
+
+
+
+    /* ==========================================================
+       CARREGAR USUÁRIO LOGADO
+    ========================================================== */
+
+    async function carregarUsuario() {
+
+    const {
+        data: {
+            user
+        },
+        error
+    } = await supabaseClient.auth.getUser();
+
+
+    if (error || !user) {
+
+        mostrarTelaLogin();
+
+        return;
+    }
+
+
+    /*
+     * Procurar perfil do usuário.
+     */
+
+    let {
+        data: profile,
+        error: profileError
+    } = await supabaseClient
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+
+
+    /*
+     * Se ainda não existir perfil,
+     * criar agora.
+     */
+
+    if (!profile) {
+
+        const nome =
+            user.user_metadata?.name ||
+            user.email.split("@")[0];
+
+
+        const username =
+            user.user_metadata?.username ||
+            user.email
+                .split("@")[0]
+                .toLowerCase()
+                .replace(/[^a-z0-9_]/g, "");
+
+
+        const {
+            data: novoPerfil,
+            error: criarPerfilError
+        } = await supabaseClient
+            .from("profiles")
+            .insert({
+
+                id: user.id,
+
+                name: nome,
+
+                username: username,
+
+                email: user.email
+
+            })
+            .select()
+            .single();
+
+
+        if (criarPerfilError) {
+
+            console.error(
+                "Erro criando perfil:",
+                criarPerfilError
+            );
+
+            /*
+             * Se deu erro porque o perfil
+             * já existe, tentamos buscar novamente.
+             */
+
+            const {
+                data: perfilExistente
+            } = await supabaseClient
+                .from("profiles")
+                .select("*")
+                .eq("id", user.id)
+                .maybeSingle();
+
+
+            profile =
+                perfilExistente || {
+
+                    id: user.id,
+
+                    name: nome,
+
+                    username: username,
+
+                    email: user.email
+
+                };
+
+        } else {
+
+            profile = novoPerfil;
+
+        }
+
+    }
+
+
+    /*
+     * Guardar usuário atual.
+     */
+
+    usuarioAtual = {
+
+        id: user.id,
+
+        email: user.email,
+
+        name:
+            profile.name ||
+            user.user_metadata?.name ||
+            "Usuário",
+
+        username:
+            profile.username ||
+            user.user_metadata?.username ||
+            "usuario"
+
+    };
+
+
+    atualizarInterfaceUsuario();
+
+    mostrarAplicacao();
+
+    await carregarPosts();
+
+}
+
+
+
+    /* ==========================================================
+       INTERFACE DO USUÁRIO
+    ========================================================== */
+
+    function atualizarInterfaceUsuario() {
+
+        if (!usuarioAtual) {
+            return;
+        }
+
+
+        const inicial =
+            usuarioAtual.name
+                .charAt(0)
+                .toUpperCase();
+
+
+        document.getElementById(
+            "topAvatar"
+        ).textContent = inicial;
+
+
+        document.getElementById(
+            "topUserName"
+        ).textContent =
+            usuarioAtual.name;
+
+
+        document.getElementById(
+            "profileAvatar"
+        ).textContent =
+            inicial;
+
+
+        document.getElementById(
+            "profileName"
+        ).textContent =
+            usuarioAtual.name;
+
+
+        document.getElementById(
+            "profileHandle"
+        ).textContent =
+            "@" + usuarioAtual.username;
+
+    }
+
+
+    /* ==========================================================
+       MOSTRAR APLICAÇÃO
+    ========================================================== */
+
+    function mostrarAplicacao() {
+
+        document.getElementById(
+            "authScreen"
+        ).style.display = "none";
+
+
+        document.getElementById(
+            "app"
+        ).style.display = "block";
+
+    }
+
+
+    function mostrarTelaLogin() {
+
+        document.getElementById(
+            "authScreen"
+        ).style.display = "flex";
+
+
+        document.getElementById(
+            "app"
+        ).style.display = "none";
+
+    }
+
+
+    /* ==========================================================
+       LOGOUT
+    ========================================================== */
+
+    async function fazerLogout() {
+
+        const {
+            error
+        } = await supabaseClient.auth.signOut();
+
+
+        if (error) {
+
+            mostrarAviso(
+                "Erro ao sair."
+            );
+
+            return;
+
+        }
+
+
+        usuarioAtual = null;
+
+        window.allPosts = window.allPosts || [];
+
+        mostrarTelaLogin();
+
+        mostrarLogin();
+
+        document.getElementById(
+            "loginEmail"
+        ).value = "";
+
+        document.getElementById(
+            "loginPassword"
+        ).value = "";
+
+    }
+
+
+    /* ==========================================================
+       NAVEGAÇÃO
+    ========================================================== */
+
+    function mostrarPagina(pagina) {
+
+        document.querySelectorAll(
+            ".page"
+        ).forEach(
+            elemento =>
+                elemento.classList.remove("active")
+        );
+
+
+        document.querySelectorAll(
+            ".menu-item"
+        ).forEach(
+            elemento =>
+                elemento.classList.remove("active")
+        );
+
+
+        const page =
+            document.getElementById(
+                "page-" + pagina
+            );
+
+
+        if (page) {
+
+            page.classList.add("active");
+
+        }
+
+
+        const menu =
+            document.getElementById(
+                "menu-" + pagina
+            );
+
+
+        if (menu) {
+
+            menu.classList.add("active");
+
+        }
+
+
+        if (pagina === "perfil") {
+
+            renderProfile();
+
+        }
+
+    }
+
+
+    /* ==========================================================
+       PUBLICAR POST
+    ========================================================== */
+
+    async function publicarNovoPost() {
+
+        if (!usuarioAtual) {
+
+            mostrarAviso(
+                "Você precisa estar logado."
+            );
+
+            return;
+
+        }
+
+
+        const textarea =
+            document.getElementById(
+                "postText"
+            );
+
+
+        const texto =
+            textarea.value.trim();
+
+
+        if (!texto) {
+
+            mostrarAviso(
+                "Digite alguma coisa antes de publicar."
+            );
+
+            return;
+
+        }
+
+
+        const {
+            error
+        } = await supabaseClient
+            .from("posts")
+            .insert({
+
+                user_id:
+                    usuarioAtual.id,
+
+                content:
+                    texto,
+
+                name:
+                    usuarioAtual.name,
+
+                handle:
+                    "@" + usuarioAtual.username,
+
+                created_at:
+                    new Date().toISOString()
+
+            });
+
+
+        if (error) {
+
+            console.error(error);
+
+            mostrarAviso(
+                "Não foi possível publicar."
+            );
+
+            return;
+
+        }
+
+
+        textarea.value = "";
+
+        mostrarAviso(
+            "🥜 Publicação criada!"
+        );
+
+
+        carregarPosts();
+
+    }
+
+
+    /* ==========================================================
+       CARREGAR POSTS
+    ========================================================== */
+
+    async function carregarPosts() {
+
+        const {
+            data: posts,
+            error
+        } = await supabaseClient
+            .from("posts")
+            .select("*")
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
+            );
+
+
+        if (error) {
+
+            console.error(error);
+
+            document.getElementById(
+                "feed"
+            ).innerHTML = `
+
+                <div class="empty">
+
+                    <h3>
+                        ⚠️ Erro ao carregar publicações
+                    </h3>
+
+                    <p style="margin-top:10px;">
+                        Verifique as permissões da tabela posts.
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        window.allPosts =
+            posts || [];
+
+
+        renderFeed();
+
+    }
+
+
+    /* ==========================================================
+       FEED
+    ========================================================== */
+
+    function renderFeed() {
+
+        const feed =
+            document.getElementById(
+                "feed"
+            );
+
+
+        if (
+            window.allPosts.length === 0
+        ) {
+
+            feed.innerHTML = `
+
+                <div class="empty">
+
+                    <h3>
+                        🥜 Ainda não existem publicações.
+                    </h3>
+
+                    <p style="margin-top:8px;">
+                        Seja o primeiro a publicar!
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        feed.innerHTML =
+            window.allPosts
+                .map(
+                    post =>
+                        criarPostHTML(post)
+                )
+                .join("");
+
+    }
+
+
+    function criarPostHTML(post) {
+
+        const nome =
+            post.name ||
+            "Usuário";
+
+
+        const handle =
+            post.handle ||
+            "@usuario";
+
+
+        const data =
+            formatarData(
+                post.created_at
+            );
+
+
+        return `
+
+            <article
+                class="post"
+                id="post-${post.id}"
+            >
+
+                <div class="post-header">
+
+                    <div class="avatar">
+                        ${escaparHTML(
+                            nome
+                                .charAt(0)
+                                .toUpperCase()
+                        )}
+                    </div>
+
+
+                    <div class="post-user">
+
+                        <div class="post-name">
+                            ${escaparHTML(nome)}
+                        </div>
+
+                        <div class="post-handle">
+
+                            ${escaparHTML(handle)}
+
+                            ·
+
+                            <span class="post-date">
+                                ${data}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        class="post-options"
+                    >
+                        ⋯
+                    </button>
+
+                </div>
+
+
+                <div class="post-content">
+                    ${escaparHTML(
+                        post.content || ""
+                    )}
+                </div>
+
+
+                <div class="post-stats">
+
+                    👍
+                    <span>
+                        0 curtidas
+                    </span>
+
+                    ·
+
+                    <span>
+                        0 comentários
+                    </span>
+
+                </div>
+
+
+                <div class="post-actions">
+
+                    <button
+                        class="post-action"
+                        onclick="curtirPost('${post.id}')"
+                    >
+                        👍 Curtir
+                    </button>
+
+
+                    <button
+                        class="post-action"
+                        onclick="comentarPost('${post.id}')"
+                    >
+                        💬 Comentar
+                    </button>
+
+
+                    <button
+                        class="post-action"
+                        onclick="compartilharPost('${post.id}')"
+                    >
+                        ↗ Compartilhar
+                    </button>
+
+                </div>
+
+            </article>
+
+        `;
+
+    }
+
+
+    /* ==========================================================
+       PERFIL
+    ========================================================== */
+
+    function renderProfile() {
+
+        const container =
+            document.getElementById(
+                "profilePosts"
+            );
+
+
+        const meusPosts =
+            window.allPosts.filter(
+                post =>
+                    post.user_id ===
+                    usuarioAtual.id
+            );
+
+
+        if (
+            meusPosts.length === 0
+        ) {
+
+            container.innerHTML = `
+
+                <div class="empty">
+
+                    <h3>
+                        Você ainda não publicou nada.
+                    </h3>
+
+                    <p style="margin-top:8px;">
+                        Faça sua primeira publicação!
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        container.innerHTML =
+            meusPosts
+                .map(
+                    post =>
+                        criarPostHTML(post)
+                )
+                .join("");
+
+    }
+
+
+    /* ==========================================================
+       PESQUISA
+    ========================================================== */
+
+    function pesquisarPosts(valor) {
+
+        valor =
+            valor
+                .trim()
+                .toLowerCase();
+
+
+        if (!valor) {
+
+            renderFeed();
+
+            return;
+
+        }
+
+
+        const resultados =
+            window.allPosts.filter(
+                post => {
+
+                    const texto =
+                        (
+                            post.content ||
+                            ""
+                        ).toLowerCase();
+
+
+                    const nome =
+                        (
+                            post.name ||
+                            ""
+                        ).toLowerCase();
+
+
+                    const handle =
+                        (
+                            post.handle ||
+                            ""
+                        ).toLowerCase();
+
+
+                    return (
+                        texto.includes(valor) ||
+                        nome.includes(valor) ||
+                        handle.includes(valor)
+                    );
+
+                }
+            );
+
+
+        const feed =
+            document.getElementById(
+                "feed"
+            );
+
+
+        if (
+            resultados.length === 0
+        ) {
+
+            feed.innerHTML = `
+
+                <div class="empty">
+
+                    <h3>
+                        Nenhuma publicação encontrada.
+                    </h3>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        feed.innerHTML =
+            resultados
+                .map(
+                    post =>
+                        criarPostHTML(post)
+                )
+                .join("");
+
+    }
+
+
+    /* ==========================================================
+       AÇÕES
+    ========================================================== */
+
+    function curtirPost(id) {
+
+        mostrarAviso(
+            "👍 Curtida registrada visualmente."
+        );
+
+    }
+
+
+    function comentarPost(id) {
+
+        const texto =
+            prompt(
+                "Digite seu comentário:"
+            );
+
+
+        if (!texto) {
+            return;
+        }
+
+
+        mostrarAviso(
+            "💬 Comentário adicionado."
+        );
+
+    }
+
+
+    function compartilharPost(id) {
+
+        const url =
+            window.location.href.split("#")[0] +
+            "#post-" +
+            id;
+
+
+        if (
+            navigator.clipboard
+        ) {
+
+            navigator.clipboard.writeText(
+                url
+            );
+
+        }
+
+
+        mostrarAviso(
+            "🔗 Link copiado!"
+        );
+
+    }
+
+
+    /* ==========================================================
+       DATA
+    ========================================================== */
+
+    function formatarData(data) {
+
+        if (!data) {
+            return "agora";
+        }
+
+
+        return new Date(
+            data
+        ).toLocaleString(
+            "pt-BR",
+            {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+
+    }
+
+
+    /* ==========================================================
+       SEGURANÇA HTML
+    ========================================================== */
+
+    function escaparHTML(texto) {
+
+        return String(texto)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+
+    }
+
+
+    /* ==========================================================
+       ERROS SUPABASE
+    ========================================================== */
+
+    function traduzirErroSupabase(mensagem) {
+
+        const texto =
+            mensagem.toLowerCase();
+
+
+        if (
+            texto.includes(
+                "user already registered"
+            )
+        ) {
+
+            return "Este e-mail já possui uma conta.";
+
+        }
+
+
+        if (
+            texto.includes(
+                "invalid login credentials"
+            )
+        ) {
+
+            return "E-mail ou senha incorretos.";
+
+        }
+
+
+        if (
+            texto.includes(
+                "password should be at least"
+            )
+        ) {
+
+            return "A senha é muito curta.";
+
+        }
+
+
+        if (
+            texto.includes(
+                "email not confirmed"
+            )
+        ) {
+
+            return "Confirme seu e-mail antes de entrar.";
+
+        }
+
+
+        return mensagem;
+
+    }
+
+
+    /* ==========================================================
+       INICIALIZAÇÃO
+    ========================================================== */
+
+    async function iniciarSistema() {
+
+        if (!window.supabase || !supabaseClient) {
+            console.error("Supabase não foi carregado. Verifique o script do CDN.");
+            mostrarAviso("Erro ao carregar o Supabase. Recarregue a página.");
+            return;
+        }
+
+        /*
+         * Verifica se já existe uma sessão.
+         */
+
+        const {
+            data: {
+                session
+            }
+        } = await supabaseClient.auth.getSession();
+
+
+        if (session) {
+
+            await carregarUsuario();
+
+        } else {
+
+            mostrarTelaLogin();
+
+        }
+
+
+        /*
+         * Observa login/logout automaticamente.
+         */
+
+        supabaseClient.auth.onAuthStateChange(
+            async (event, session) => {
+
+                if (
+                    event === "SIGNED_OUT"
+                ) {
+
+                    mostrarTelaLogin();
+
+                    return;
+
+                }
+
+
+                if (
+                    event === "SIGNED_IN" &&
+                    session
+                ) {
+
+                    /*
+                     * Evita processamento duplicado
+                     * se já houver usuário.
+                     */
+
+                    if (!usuarioAtual) {
+
+                        await carregarUsuario();
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        iniciarSistema
+    );
+
+</script>
+
+</body>
+</html>
