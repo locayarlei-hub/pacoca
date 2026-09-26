@@ -1,0 +1,2878 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Paçoca - Rede Social</title>
+
+    <!-- SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+</script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --marrom: #5b3a20;
+            --marrom-escuro: #402714;
+            --pacoca: #d99a32;
+            --pacoca-claro: #f5dfb1;
+            --fundo: #f2eee8;
+            --branco: #ffffff;
+            --borda: #d9d2c8;
+            --texto: #292929;
+            --cinza: #777;
+            --azul: #4267a9;
+            --vermelho: #c0392b;
+            --verde: #2e8b57;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--fundo);
+            color: var(--texto);
+        }
+
+        button,
+        input,
+        textarea {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        /* ==========================================
+           LOGIN / CADASTRO
+        ========================================== */
+
+        #authScreen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+
+            background:
+                radial-gradient(
+                    circle at 20% 10%,
+                    #f4d89b,
+                    transparent 35%
+                ),
+                linear-gradient(
+                    135deg,
+                    #f5efe5,
+                    #eadbc1
+                );
+        }
+
+        .auth-box {
+            width: 420px;
+            max-width: 100%;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 15px 50px rgba(60, 35, 10, .18);
+            border: 1px solid var(--borda);
+        }
+
+        .auth-header {
+            background: var(--marrom);
+            color: white;
+            padding: 28px 25px;
+            text-align: center;
+        }
+
+        .auth-logo {
+            font-size: 38px;
+            font-weight: bold;
+            color: #ffe2a0;
+        }
+
+        .auth-subtitle {
+            margin-top: 7px;
+            color: #e9dbc5;
+        }
+
+        .auth-body {
+            padding: 25px;
+        }
+
+        .auth-title {
+            font-size: 22px;
+            color: var(--marrom);
+            margin-bottom: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            border: 1px solid var(--borda);
+            padding: 11px;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: var(--pacoca);
+        }
+
+        .auth-button {
+            width: 100%;
+            border: none;
+            background: var(--pacoca);
+            color: white;
+            padding: 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 15px;
+            margin-top: 5px;
+        }
+
+        .auth-button:hover {
+            background: #bd7f1f;
+        }
+
+        .auth-link {
+            text-align: center;
+            margin-top: 18px;
+            color: var(--azul);
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+
+        .auth-error {
+            display: none;
+            background: #fbe8e6;
+            border: 1px solid #efb4af;
+            color: var(--vermelho);
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 14px;
+            font-size: 13px;
+        }
+
+        .auth-success {
+            display: none;
+            background: #e7f5ec;
+            border: 1px solid #b6ddc3;
+            color: var(--verde);
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 14px;
+            font-size: 13px;
+        }
+
+        .password-help {
+            font-size: 11px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        /* ==========================================
+           APLICAÇÃO
+        ========================================== */
+
+        #app {
+            display: none;
+        }
+
+        .topbar {
+            height: 58px;
+            background: var(--marrom);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,.2);
+        }
+
+        .topbar-content {
+            max-width: 1200px;
+            height: 100%;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffe2a0;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .logo span {
+            font-size: 27px;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 420px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 9px 13px;
+            border: none;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .top-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .top-button {
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 18px;
+            width: 38px;
+            height: 38px;
+            border-radius: 4px;
+        }
+
+        .top-button:hover {
+            background: rgba(255,255,255,.12);
+        }
+
+        .user-mini {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--pacoca);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        /* ==========================================
+           LAYOUT
+        ========================================== */
+
+        .layout {
+            width: 1200px;
+            max-width: calc(100% - 30px);
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: 210px minmax(400px, 650px) 260px;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .sidebar,
+        .right-sidebar {
+            position: sticky;
+            top: 78px;
+        }
+
+        /* ==========================================
+           MENU
+        ========================================== */
+
+        .menu {
+            background: white;
+            border: 1px solid var(--borda);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .menu-title {
+            padding: 12px;
+            background: var(--pacoca-claro);
+            color: var(--marrom);
+            font-weight: bold;
+            border-bottom: 1px solid var(--borda);
+        }
+
+        .menu-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #444;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            background: #faf7f2;
+        }
+
+        .menu-item.active {
+            background: #f0dfbc;
+            border-left: 4px solid var(--pacoca);
+            font-weight: bold;
+            color: var(--marrom);
+        }
+
+        /* ==========================================
+           PÁGINAS
+        ========================================== */
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* ==========================================
+           PUBLICAÇÃO
+        ========================================== */
+
+        .composer {
+            background: white;
+            border: 1px solid var(--borda);
+            border-radius: 5px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .composer-title {
+            padding: 13px;
+            background: #faf8f4;
+            color: var(--marrom);
+            font-weight: bold;
+            border-bottom: 1px solid var(--borda);
+        }
+
+        .composer-body {
+            padding: 15px;
+        }
+
+        .composer textarea {
+            width: 100%;
+            min-height: 90px;
+            border: 1px solid var(--borda);
+            border-radius: 4px;
+            padding: 12px;
+            resize: vertical;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .composer textarea:focus {
+            border-color: var(--pacoca);
+        }
+
+        .composer-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .secondary-button {
+            background: white;
+            border: 1px solid var(--borda);
+            padding: 8px 11px;
+            border-radius: 4px;
+            color: #666;
+        }
+
+        .publish-button {
+            background: var(--pacoca);
+            color: white;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .publish-button:hover {
+            background: #bd7f1f;
+        }
+
+        /* ==========================================
+           POST
+        ========================================== */
+
+        .post {
+            background: white;
+            border: 1px solid var(--borda);
+            border-radius: 5px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px;
+        }
+
+        .post-user {
+            flex: 1;
+        }
+
+        .post-name {
+            font-weight: bold;
+        }
+
+        .post-handle {
+            font-size: 12px;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        .post-content {
+            padding: 0 15px 15px;
+            line-height: 1.55;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .post-date {
+            color: #999;
+            font-size: 11px;
+        }
+
+        .post-options {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #888;
+        }
+
+        .post-stats {
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+            padding: 8px 15px;
+            color: #777;
+            font-size: 12px;
+        }
+
+        .post-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .post-action {
+            border: none;
+            background: white;
+            padding: 10px;
+            color: #666;
+            font-weight: bold;
+        }
+
+        .post-action:hover {
+            background: #faf7f2;
+        }
+
+        /* ==========================================
+           DIREITA
+        ========================================== */
+
+        .side-card {
+            background: white;
+            border: 1px solid var(--borda);
+            border-radius: 5px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .side-title {
+            padding: 12px;
+            background: #faf8f4;
+            border-bottom: 1px solid var(--borda);
+            font-weight: bold;
+            color: var(--marrom);
+        }
+
+        .person {
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .person-info {
+            flex: 1;
+        }
+
+        .person-name {
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .person-detail {
+            color: #888;
+            font-size: 11px;
+        }
+
+        .add-button {
+            border: 1px solid var(--borda);
+            background: white;
+            padding: 5px 8px;
+            border-radius: 4px;
+        }
+
+        /* ==========================================
+           PERFIL
+        ========================================== */
+
+        .cover {
+            height: 180px;
+            background: linear-gradient(
+                120deg,
+                #4c301b,
+                #d99a32
+            );
+            border-radius: 5px 5px 0 0;
+        }
+
+        .profile-card {
+            background: white;
+            border: 1px solid var(--borda);
+            padding: 0 20px 20px;
+            margin-bottom: 15px;
+        }
+
+        .profile-avatar {
+            width: 105px;
+            height: 105px;
+            border-radius: 50%;
+            background: var(--pacoca);
+            color: white;
+            border: 5px solid white;
+            margin-top: -52px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: bold;
+        }
+
+        .profile-name {
+            font-size: 25px;
+            margin-top: 8px;
+            font-weight: bold;
+        }
+
+        .profile-handle {
+            color: #888;
+            margin-top: 3px;
+        }
+
+        .profile-bio {
+            color: #555;
+            margin-top: 12px;
+        }
+
+        /* ==========================================
+           LISTAS
+        ========================================== */
+
+        .section-title {
+            color: var(--marrom);
+            font-size: 21px;
+            margin-bottom: 15px;
+        }
+
+        .empty {
+            background: white;
+            border: 1px solid var(--borda);
+            padding: 35px;
+            text-align: center;
+            border-radius: 5px;
+            color: #777;
+        }
+
+        /* ==========================================
+           TOAST
+        ========================================== */
+
+        #toast {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            background: var(--marrom);
+            color: white;
+            padding: 13px 18px;
+            border-radius: 5px;
+            opacity: 0;
+            transform: translateY(100px);
+            transition: .25s;
+            z-index: 9999;
+            box-shadow: 0 5px 20px rgba(0,0,0,.25);
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ==========================================
+           RESPONSIVO
+        ========================================== */
+
+        @media (max-width: 1000px) {
+
+            .layout {
+                grid-template-columns: 180px 1fr;
+            }
+
+            .right-sidebar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 700px) {
+
+            .topbar-content {
+                padding: 0 8px;
+            }
+
+            .logo {
+                font-size: 19px;
+            }
+
+            .search-box {
+                display: none;
+            }
+
+            .user-mini span {
+                display: none;
+            }
+
+            .layout {
+                display: block;
+                max-width: calc(100% - 12px);
+                margin-top: 10px;
+            }
+
+            .sidebar {
+                position: static;
+                margin-bottom: 10px;
+            }
+
+            .menu {
+                display: flex;
+                overflow-x: auto;
+            }
+
+            .menu-title {
+                display: none;
+            }
+
+            .menu-item {
+                white-space: nowrap;
+                border-bottom: none;
+            }
+
+            .cover {
+                height: 130px;
+            }
+        }
+    
+/* ===== PAÇOCA 2.0 ===== */
+.profile-cover-wrap{position:relative}.cover{background-size:cover;background-position:center;position:relative}
+.cover-edit{position:absolute;right:12px;bottom:12px}.profile-avatar{overflow:hidden;background-size:cover;background-position:center}
+.profile-avatar img,.avatar img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.profile-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.pacoca-btn{border:0;border-radius:6px;padding:9px 13px;font-weight:700;cursor:pointer;background:var(--pacoca);color:#fff}
+.pacoca-btn.alt{background:#fff;color:var(--marrom);border:1px solid var(--borda)}
+.pacoca-btn.danger{background:var(--vermelho)}
+.profile-editor{display:none;margin-top:14px;padding:14px;background:#faf8f4;border:1px solid var(--borda);border-radius:6px}
+.profile-editor input,.profile-editor textarea,.friend-search input,.chat-input input,.comment-form input{width:100%;padding:10px;border:1px solid var(--borda);border-radius:5px;outline:none}
+.profile-editor textarea{min-height:70px;resize:vertical;margin-top:8px}
+.upload-hidden{display:none}.post-image{width:100%;max-height:560px;object-fit:cover;display:block;border-top:1px solid #eee;border-bottom:1px solid #eee}
+.composer-preview{display:none;margin-top:10px;position:relative}.composer-preview img{max-width:100%;max-height:300px;border-radius:6px}
+.remove-preview{position:absolute;right:6px;top:6px;border:0;border-radius:50%;width:30px;height:30px}
+.post-action.liked{color:#b86d00;background:#fff6e4}.comments-box{padding:10px 14px 14px;border-top:1px solid #eee}
+.comment{display:flex;gap:8px;margin-top:9px}.comment-bubble{background:#f5f1eb;border-radius:10px;padding:8px 10px;flex:1;font-size:13px}
+.comment-form{display:flex;gap:7px;margin-top:10px}.comment-form button{flex:none}
+.friend-search{display:flex;gap:8px;margin-bottom:15px}.friend-search button{flex:none}
+.friend-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.friend-tab{padding:8px 11px;border:1px solid var(--borda);background:#fff;border-radius:5px}.friend-tab.active{background:var(--pacoca-claro);font-weight:bold}
+.person-actions{display:flex;gap:5px;flex-wrap:wrap}.person .avatar{overflow:hidden}
+.badge{display:inline-block;min-width:18px;padding:2px 5px;border-radius:10px;background:var(--vermelho);color:#fff;font-size:10px;text-align:center}
+.chat-layout{display:grid;grid-template-columns:220px 1fr;min-height:480px;background:#fff;border:1px solid var(--borda);border-radius:6px;overflow:hidden}
+.chat-list{border-right:1px solid var(--borda);overflow:auto}.chat-contact{padding:12px;border-bottom:1px solid #eee;cursor:pointer}.chat-contact:hover,.chat-contact.active{background:#faf1df}
+.chat-main{display:flex;flex-direction:column}.chat-head{padding:12px;border-bottom:1px solid var(--borda);font-weight:bold}.chat-messages{flex:1;padding:14px;overflow:auto;max-height:430px}
+.msg{max-width:75%;padding:9px 11px;border-radius:12px;margin:6px 0;background:#eee}.msg.mine{margin-left:auto;background:#f2d79f}.msg-time{font-size:9px;color:#777;margin-top:4px}.msg-image{display:block;max-width:100%;max-height:360px;border-radius:8px;margin-top:6px;cursor:pointer}.click-profile{cursor:pointer}.click-profile:hover{text-decoration:underline}.public-profile-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.chat-input{display:flex;gap:7px;padding:10px;border-top:1px solid var(--borda)}.chat-input button{flex:none}
+.notification-item{padding:12px;border-bottom:1px solid #eee}.notification-item.unread{background:#fff9ed}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.photo-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:5px}
+.post-owner-actions{position:relative}.post-menu{display:none;position:absolute;right:0;top:28px;background:#fff;border:1px solid var(--borda);box-shadow:0 4px 14px #0002;z-index:5;min-width:120px}.post-menu button{display:block;width:100%;padding:9px;border:0;background:#fff;text-align:left}
+@media(max-width:700px){.chat-layout{grid-template-columns:1fr}.chat-list{max-height:150px;border-right:0;border-bottom:1px solid var(--borda)}.photo-grid{grid-template-columns:repeat(2,1fr)}}
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- ==========================================================
+     TELA DE AUTENTICAÇÃO
+========================================================== -->
+
+<div id="authScreen">
+
+    <div class="auth-box">
+
+        <div class="auth-header">
+
+            <div class="auth-logo">
+                🥜 PAÇOCA
+            </div>
+
+            <div class="auth-subtitle">
+                A rede social do seu jeito.
+            </div>
+
+        </div>
+
+
+        <!-- LOGIN -->
+
+        <div
+            class="auth-body"
+            id="loginForm"
+        >
+
+            <div class="auth-title">
+                Entrar
+            </div>
+
+            <div
+                class="auth-error"
+                id="loginError"
+            ></div>
+
+            <div class="form-group">
+
+                <label>
+                    E-mail
+                </label>
+
+                <input
+                    type="email"
+                    id="loginEmail"
+                    placeholder="seu@email.com"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Senha
+                </label>
+
+                <input
+                    type="password"
+                    id="loginPassword"
+                    placeholder="Sua senha"
+                    onkeydown="if(event.key === 'Enter') fazerLogin()"
+                >
+
+            </div>
+
+
+            <button
+                class="auth-button"
+                type="button"
+                onclick="fazerLogin()"
+            >
+                ENTRAR
+            </button>
+
+
+            <div
+                class="auth-link"
+                onclick="mostrarCadastro()"
+            >
+                Ainda não tenho uma conta
+            </div>
+
+        </div>
+
+
+        <!-- CADASTRO -->
+
+        <div
+            class="auth-body"
+            id="registerForm"
+            style="display:none;"
+        >
+
+            <div class="auth-title">
+                Criar conta
+            </div>
+
+
+            <div
+                class="auth-error"
+                id="registerError"
+            ></div>
+
+
+            <div
+                class="auth-success"
+                id="registerSuccess"
+            ></div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Nome
+                </label>
+
+                <input
+                    type="text"
+                    id="registerName"
+                    placeholder="Seu nome"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Nome de usuário
+                </label>
+
+                <input
+                    type="text"
+                    id="registerUsername"
+                    placeholder="seuusuario"
+                >
+
+                <div class="password-help">
+                    Use apenas letras, números e _
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    E-mail
+                </label>
+
+                <input
+                    type="email"
+                    id="registerEmail"
+                    placeholder="seu@email.com"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Senha
+                </label>
+
+                <input
+                    type="password"
+                    id="registerPassword"
+                    placeholder="Crie uma senha"
+                >
+
+                <div class="password-help">
+                    Mínimo recomendado: 6 caracteres.
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Confirmar senha
+                </label>
+
+                <input
+                    type="password"
+                    id="registerPasswordConfirm"
+                    placeholder="Digite a senha novamente"
+                >
+
+            </div>
+
+
+            <button
+                class="auth-button"
+                type="button"
+                onclick="criarConta()"
+            >
+                CRIAR MINHA CONTA
+            </button>
+
+
+            <div
+                class="auth-link"
+                onclick="mostrarLogin()"
+            >
+                Já tenho uma conta
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ==========================================================
+     APLICAÇÃO
+========================================================== -->
+
+<div id="app">
+
+
+    <!-- TOPO -->
+
+    <header class="topbar">
+
+        <div class="topbar-content">
+
+
+            <div
+                class="logo"
+                onclick="mostrarPagina('feed')"
+            >
+                <span>🥜</span>
+                PAÇOCA
+            </div>
+
+
+            <div class="search-box">
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Pesquisar..."
+                    oninput="pesquisarPosts(this.value)"
+                >
+
+            </div>
+
+
+            <div class="top-actions">
+
+                <button
+                    class="top-button"
+                    onclick="mostrarPagina('feed')"
+                    title="Início"
+                >
+                    🏠
+                </button>
+
+
+                <button
+                    class="top-button"
+                    onclick="mostrarPagina('amigos')"
+                    title="Amigos"
+                >
+                    👥
+                </button>
+
+
+                <button
+                    class="top-button"
+                    onclick="mostrarPagina('mensagens')"
+                    title="Mensagens"
+                >
+                    💬
+                </button>
+
+
+                <button
+                    class="top-button"
+                    onclick="mostrarPagina('notificacoes')"
+                    title="Notificações"
+                >
+                    🔔
+                </button>
+
+
+                <div
+                    class="user-mini"
+                    onclick="mostrarPagina('perfil')"
+                >
+
+                    <div
+                        class="avatar"
+                        id="topAvatar"
+                    >
+                        ?
+                    </div>
+
+                    <span id="topUserName">
+                        Usuário
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- LAYOUT -->
+
+    <main class="layout">
+
+
+        <!-- MENU ESQUERDO -->
+
+        <aside class="sidebar">
+
+            <div class="menu">
+
+                <div class="menu-title">
+                    MENU
+                </div>
+
+
+                <div
+                    class="menu-item active"
+                    id="menu-feed"
+                    onclick="mostrarPagina('feed')"
+                >
+                    🏠 Início
+                </div>
+
+
+                <div
+                    class="menu-item"
+                    id="menu-perfil"
+                    onclick="mostrarPagina('perfil')"
+                >
+                    👤 Meu perfil
+                </div>
+
+
+                <div
+                    class="menu-item"
+                    onclick="mostrarPagina('amigos')"
+                >
+                    👥 Amigos
+                </div>
+
+
+                <div
+                    class="menu-item"
+                    onclick="mostrarPagina('mensagens')"
+                >
+                    💬 Mensagens
+                </div>
+
+
+                <div
+                    class="menu-item"
+                    onclick="mostrarPagina('notificacoes')"
+                >
+                    🔔 Notificações
+                </div>
+
+
+                <div
+                    class="menu-item"
+                    onclick="mostrarPagina('fotos')"
+                >
+                    📷 Fotos
+                </div>
+
+
+                <div
+                    class="menu-item"
+                    onclick="fazerLogout()"
+                >
+                    🚪 Sair
+                </div>
+
+            </div>
+
+        </aside>
+
+
+
+        <!-- CONTEÚDO -->
+
+        <section>
+
+
+            <!-- FEED -->
+
+            <div
+                class="page active"
+                id="page-feed"
+            >
+
+
+                <div class="composer">
+
+                    <div class="composer-title">
+                        🥜 Compartilhe alguma coisa
+                    </div>
+
+
+                    <div class="composer-body">
+
+                        <textarea
+                            id="postText"
+                            placeholder="No que você está pensando?"
+                        ></textarea>
+
+
+                        <div class="composer-footer">
+
+                            <button class="secondary-button" type="button" onclick="document.getElementById('postImageInput').click()">📷 Foto</button>
+<input id="postImageInput" class="upload-hidden" type="file" accept="image/*" onchange="prepararFotoPost(this)">
+<div id="postImagePreview" class="composer-preview"><img id="postPreviewImg"><button class="remove-preview" type="button" onclick="removerFotoPost()">✕</button></div>
+
+
+                            <button
+                                class="publish-button"
+                                onclick="publicarNovoPost()"
+                            >
+                                PUBLICAR
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div id="feed">
+
+                    <div class="empty">
+                        Carregando publicações...
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- PERFIL -->
+
+            <div
+                class="page"
+                id="page-perfil"
+            >
+
+                <div class="profile-cover-wrap">
+<div class="cover" id="profileCover"></div>
+<button class="pacoca-btn alt cover-edit" type="button" onclick="document.getElementById('coverInput').click()">📷 Alterar capa</button>
+<input id="coverInput" class="upload-hidden" type="file" accept="image/*" onchange="alterarImagemPerfil(this,'cover')">
+</div>
+
+
+                <div class="profile-card">
+
+                    <div
+                        class="profile-avatar"
+                        id="profileAvatar"
+                    >
+                        ?
+                    </div>
+
+
+                    <div
+                        class="profile-name"
+                        id="profileName"
+                    >
+                        Usuário
+                    </div>
+
+
+                    <div
+                        class="profile-handle"
+                        id="profileHandle"
+                    >
+                        @usuario
+                    </div>
+
+
+                    <div class="profile-bio" id="profileBio">Bem-vindo ao meu perfil na Paçoca! 🥜</div>
+<div class="profile-tools">
+<button class="pacoca-btn alt" type="button" onclick="document.getElementById('avatarInput').click()">📷 Foto de perfil</button>
+<input id="avatarInput" class="upload-hidden" type="file" accept="image/*" onchange="alterarImagemPerfil(this,'avatar')">
+<button class="pacoca-btn" type="button" onclick="alternarEditorPerfil()">✏️ Editar perfil</button>
+</div>
+<div class="profile-editor" id="profileEditor">
+<input id="editName" placeholder="Seu nome">
+<textarea id="editBio" placeholder="Conte um pouco sobre você"></textarea>
+<button class="pacoca-btn" type="button" onclick="salvarPerfil()">Salvar alterações</button>
+</div>
+
+                </div>
+
+
+                <h2 class="section-title">
+                    Minhas publicações
+                </h2>
+
+
+                <div id="profilePosts"></div>
+
+            </div>
+
+
+
+            <!-- PERFIL PÚBLICO -->
+<div class="page" id="page-perfil-publico">
+<div class="profile-cover-wrap"><div class="cover" id="publicProfileCover"></div></div>
+<div class="profile-card">
+<div class="profile-avatar" id="publicProfileAvatar">?</div>
+<div class="profile-name" id="publicProfileName">Usuário</div>
+<div class="profile-handle" id="publicProfileHandle">@usuario</div>
+<div class="profile-bio" id="publicProfileBio"></div>
+<div class="public-profile-actions" id="publicProfileActions"></div>
+</div>
+<h2 class="section-title">Publicações</h2>
+<div id="publicProfilePosts"></div>
+</div>
+
+<!-- AMIGOS -->
+<div class="page" id="page-amigos">
+<h2 class="section-title">👥 Amigos</h2>
+<div class="friend-search"><input id="friendSearch" placeholder="Pesquise por nome ou @usuário" onkeydown="if(event.key==='Enter') pesquisarUsuarios()"><button class="pacoca-btn" onclick="pesquisarUsuarios()">Pesquisar</button></div>
+<div class="friend-tabs">
+<button class="friend-tab active" onclick="carregarAmigos('amigos',this)">Meus amigos</button>
+<button class="friend-tab" onclick="carregarAmigos('recebidas',this)">Solicitações recebidas <span id="friendBadge"></span></button>
+<button class="friend-tab" onclick="carregarAmigos('enviadas',this)">Enviadas</button>
+</div>
+<div id="friendsContent"><div class="empty">Carregando...</div></div>
+</div>
+
+<!-- MENSAGENS -->
+<div class="page" id="page-mensagens">
+<h2 class="section-title">💬 Mensagens</h2>
+<div class="chat-layout">
+<div class="chat-list" id="chatContacts"><div class="empty">Seus amigos aparecerão aqui.</div></div>
+<div class="chat-main">
+<div class="chat-head" id="chatHead">Selecione um amigo</div>
+<div class="chat-messages" id="chatMessages"><div class="empty">Escolha um amigo para começar a conversar.</div></div>
+<div class="chat-input"><input id="messageInput" placeholder="Digite uma mensagem..." onkeydown="if(event.key==='Enter') enviarMensagem()"><input id="chatImageInput" class="upload-hidden" type="file" accept="image/*" onchange="enviarFotoChat(this)"><button class="pacoca-btn alt" type="button" onclick="document.getElementById('chatImageInput').click()">📷 Foto</button><button class="pacoca-btn" onclick="enviarMensagem()">Enviar</button></div>
+</div></div></div>
+
+<!-- NOTIFICAÇÕES -->
+<div class="page" id="page-notificacoes">
+<h2 class="section-title">🔔 Notificações</h2>
+<div class="side-card" id="notificationsContent"><div class="empty">Carregando notificações...</div></div>
+</div>
+
+<!-- FOTOS -->
+<div class="page" id="page-fotos">
+<h2 class="section-title">📷 Fotos</h2>
+<div id="photosContent" class="photo-grid"></div>
+</div>
+</section>
+
+
+
+        <!-- DIREITA -->
+
+        <aside class="right-sidebar">
+
+
+            <div class="side-card"><div class="side-title">👥 Pessoas que talvez você conheça</div><div id="suggestionsContent"></div></div><div class="side-card"><div class="side-title">🥜 Sobre a Paçoca
+                </div>
+
+                <div style="
+                    padding:14px;
+                    color:#777;
+                    font-size:12px;
+                    line-height:1.5;
+                ">
+                    Uma rede social simples,
+                    nostálgica e feita para conectar
+                    pessoas.
+                </div>
+
+            </div>
+
+        </aside>
+
+    </main>
+
+</div>
+
+
+<div id="toast"></div>
+
+
+
+<!-- ==========================================================
+     JAVASCRIPT
+========================================================== -->
+
+<script>
+
+    /* ==========================================================
+       SUPABASE
+    ========================================================== */
+
+    // Configuração global segura para Live Server / Live Reload.
+    // O cliente fica em window para evitar erro de redeclaração ao recarregar.
+    window.PACOCA_SUPABASE_URL =
+        window.PACOCA_SUPABASE_URL ||
+        'https://gxpsvwpqqlhwxmdkstak.supabase.co';
+
+    window.PACOCA_SUPABASE_ANON_KEY =
+        window.PACOCA_SUPABASE_ANON_KEY ||
+        'sb_publishable_pwBJIhUUVT1hTke_fWh3hw_PLz5CMGw';
+
+    window.pacocaSupabase =
+        window.pacocaSupabase ||
+        window.supabase.createClient(
+            window.PACOCA_SUPABASE_URL,
+            window.PACOCA_SUPABASE_ANON_KEY
+        );
+
+    var supabaseClient = window.pacocaSupabase;
+
+
+    /* ==========================================================
+       VARIÁVEIS
+    ========================================================== */
+
+    var usuarioAtual = window.usuarioAtual || null;
+
+    window.allPosts = window.allPosts || [];
+
+
+    /* ==========================================================
+       MENSAGENS
+    ========================================================== */
+
+    function mostrarErro(id, mensagem) {
+
+        const elemento =
+            document.getElementById(id);
+
+        elemento.textContent = mensagem;
+
+        elemento.style.display = "block";
+
+    }
+
+
+    function esconderMensagem(id) {
+
+        document.getElementById(id)
+            .style.display = "none";
+
+    }
+
+
+    function mostrarAviso(mensagem) {
+
+        const toast =
+            document.getElementById("toast");
+
+        toast.textContent = mensagem;
+
+        toast.classList.add("show");
+
+        setTimeout(() => {
+
+            toast.classList.remove("show");
+
+        }, 3000);
+
+    }
+
+
+    /* ==========================================================
+       ALTERNAR LOGIN / CADASTRO
+    ========================================================== */
+
+    function mostrarCadastro() {
+
+        document.getElementById(
+            "loginForm"
+        ).style.display = "none";
+
+        document.getElementById(
+            "registerForm"
+        ).style.display = "block";
+
+        esconderMensagem("loginError");
+
+    }
+
+
+    function mostrarLogin() {
+
+        document.getElementById(
+            "registerForm"
+        ).style.display = "none";
+
+        document.getElementById(
+            "loginForm"
+        ).style.display = "block";
+
+        esconderMensagem("registerError");
+
+        esconderMensagem("registerSuccess");
+
+    }
+
+
+    /* ==========================================================
+       CADASTRO
+    ========================================================== */
+
+    async function criarConta() {
+
+        const errorBox = document.getElementById("registerError");
+        const successBox = document.getElementById("registerSuccess");
+        const botao = document.querySelector('#registerForm button[onclick="criarConta()"]');
+
+        esconderMensagem("registerError");
+        esconderMensagem("registerSuccess");
+
+        try {
+            const nome = document.getElementById("registerName").value.trim();
+            const username = document.getElementById("registerUsername").value.trim().toLowerCase();
+            const email = document.getElementById("registerEmail").value.trim();
+            const senha = document.getElementById("registerPassword").value;
+            const confirmar = document.getElementById("registerPasswordConfirm").value;
+
+            if (!nome) return mostrarErro("registerError", "Digite seu nome.");
+            if (!username) return mostrarErro("registerError", "Digite um nome de usuário.");
+            if (!/^[a-z0-9_]+$/.test(username)) {
+                return mostrarErro("registerError", "O usuário deve conter apenas letras, números e _.");
+            }
+            if (!email) return mostrarErro("registerError", "Digite seu e-mail.");
+            if (senha.length < 6) return mostrarErro("registerError", "A senha precisa ter pelo menos 6 caracteres.");
+            if (senha !== confirmar) return mostrarErro("registerError", "As senhas não são iguais.");
+
+            if (botao) {
+                botao.disabled = true;
+                botao.textContent = "CRIANDO CONTA...";
+            }
+
+            // O cadastro da conta é feito diretamente pelo Supabase Auth.
+            // A existência do username é verificada apenas se a tabela estiver disponível.
+            const { data: existente, error: usernameError } = await supabaseClient
+                .from("profiles")
+                .select("id")
+                .eq("username", username)
+                .maybeSingle();
+
+            if (usernameError) {
+                console.warn("Não foi possível verificar o usuário antes do cadastro. O Auth continuará normalmente.", usernameError);
+            }
+
+            if (existente) {
+                mostrarErro("registerError", "Esse nome de usuário já está sendo utilizado.");
+                return;
+            }
+
+            const { data, error } = await supabaseClient.auth.signUp({
+                email,
+                password: senha,
+                options: {
+                    data: {
+                        name: nome,
+                        username: username
+                    }
+                }
+            });
+
+            if (error) {
+                console.error("Erro no cadastro:", error);
+                mostrarErro("registerError", traduzirErroSupabase(error.message));
+                return;
+            }
+
+            if (!data || !data.user) {
+                mostrarErro("registerError", "O Supabase não retornou o usuário criado.");
+                return;
+            }
+
+            // Se a confirmação de e-mail estiver desligada, já existe uma sessão.
+            // Nesse caso, criamos também o perfil.
+            if (data.session) {
+                const { error: perfilError } = await supabaseClient
+                    .from("profiles")
+                    .insert({
+                        id: data.user.id,
+                        name: nome,
+                        username: username,
+                        email: email
+                    });
+
+                if (perfilError) {
+                    console.error("Conta criada, mas houve erro ao salvar o perfil:", perfilError);
+                    mostrarErro("registerError", "A conta foi criada, mas o perfil não pôde ser salvo. Verifique a tabela profiles e as políticas RLS.");
+                    return;
+                }
+
+                await carregarUsuario();
+                mostrarAviso("🥜 Conta criada com sucesso!");
+                return;
+            }
+
+            // Se a confirmação de e-mail estiver ligada.
+            successBox.textContent = "Conta criada! Verifique seu e-mail para confirmar o cadastro. Depois volte e faça login.";
+            successBox.style.display = "block";
+
+        } catch (erro) {
+            console.error("Erro inesperado no cadastro:", erro);
+            mostrarErro("registerError", "Não foi possível concluir o cadastro. Abra o Console (F12) para ver o erro detalhado.");
+        } finally {
+            if (botao) {
+                botao.disabled = false;
+                botao.textContent = "CRIAR MINHA CONTA";
+            }
+        }
+    }
+
+
+
+    /* ==========================================================
+       LOGIN
+    ========================================================== */
+
+    async function fazerLogin() {
+
+    esconderMensagem("loginError");
+
+
+    const email =
+        document.getElementById("loginEmail")
+            .value
+            .trim();
+
+
+    const password =
+        document.getElementById("loginPassword")
+            .value;
+
+
+    if (!email || !password) {
+
+        mostrarErro(
+            "loginError",
+            "Informe seu e-mail e senha."
+        );
+
+        return;
+    }
+
+
+    const {
+        data,
+        error
+    } = await supabaseClient.auth.signInWithPassword({
+
+        email: email,
+
+        password: password
+
+    });
+
+
+    if (error) {
+
+        console.error(
+            "Erro no login:",
+            error
+        );
+
+        mostrarErro(
+            "loginError",
+            traduzirErroSupabase(
+                error.message
+            )
+        );
+
+        return;
+    }
+
+
+    if (!data.user) {
+
+        mostrarErro(
+            "loginError",
+            "Não foi possível localizar sua conta."
+        );
+
+        return;
+    }
+
+
+    /*
+     * Login realizado.
+     */
+
+    await carregarUsuario();
+
+}
+
+
+
+    /* ==========================================================
+       CARREGAR USUÁRIO LOGADO
+    ========================================================== */
+
+    async function carregarUsuario() {
+
+    const {
+        data: {
+            user
+        },
+        error
+    } = await supabaseClient.auth.getUser();
+
+
+    if (error || !user) {
+
+        mostrarTelaLogin();
+
+        return;
+    }
+
+
+    /*
+     * Procurar perfil do usuário.
+     */
+
+    let {
+        data: profile,
+        error: profileError
+    } = await supabaseClient
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+
+
+    /*
+     * Se ainda não existir perfil,
+     * criar agora.
+     */
+
+    if (!profile) {
+
+        const nome =
+            user.user_metadata?.name ||
+            user.email.split("@")[0];
+
+
+        const username =
+            user.user_metadata?.username ||
+            user.email
+                .split("@")[0]
+                .toLowerCase()
+                .replace(/[^a-z0-9_]/g, "");
+
+
+        const {
+            data: novoPerfil,
+            error: criarPerfilError
+        } = await supabaseClient
+            .from("profiles")
+            .insert({
+
+                id: user.id,
+
+                name: nome,
+
+                username: username,
+
+                email: user.email
+
+            })
+            .select()
+            .single();
+
+
+        if (criarPerfilError) {
+
+            console.error(
+                "Erro criando perfil:",
+                criarPerfilError
+            );
+
+            /*
+             * Se deu erro porque o perfil
+             * já existe, tentamos buscar novamente.
+             */
+
+            const {
+                data: perfilExistente
+            } = await supabaseClient
+                .from("profiles")
+                .select("*")
+                .eq("id", user.id)
+                .maybeSingle();
+
+
+            profile =
+                perfilExistente || {
+
+                    id: user.id,
+
+                    name: nome,
+
+                    username: username,
+
+                    email: user.email
+
+                };
+
+        } else {
+
+            profile = novoPerfil;
+
+        }
+
+    }
+
+
+    /*
+     * Guardar usuário atual.
+     */
+
+    usuarioAtual = {
+
+        id: user.id,
+
+        email: user.email,
+
+        name:
+            profile.name ||
+            user.user_metadata?.name ||
+            "Usuário",
+
+        username:
+            profile.username ||
+            user.user_metadata?.username ||
+            "usuario"
+
+    };
+
+
+    atualizarInterfaceUsuario();
+
+    mostrarAplicacao();
+
+    await carregarPosts();
+
+}
+
+
+
+    /* ==========================================================
+       INTERFACE DO USUÁRIO
+    ========================================================== */
+
+    function atualizarInterfaceUsuario() {
+
+        if (!usuarioAtual) {
+            return;
+        }
+
+
+        const inicial =
+            usuarioAtual.name
+                .charAt(0)
+                .toUpperCase();
+
+
+        document.getElementById(
+            "topAvatar"
+        ).textContent = inicial;
+
+
+        document.getElementById(
+            "topUserName"
+        ).textContent =
+            usuarioAtual.name;
+
+
+        document.getElementById(
+            "profileAvatar"
+        ).textContent =
+            inicial;
+
+
+        document.getElementById(
+            "profileName"
+        ).textContent =
+            usuarioAtual.name;
+
+
+        document.getElementById(
+            "profileHandle"
+        ).textContent =
+            "@" + usuarioAtual.username;
+
+    }
+
+
+    /* ==========================================================
+       MOSTRAR APLICAÇÃO
+    ========================================================== */
+
+    function mostrarAplicacao() {
+
+        document.getElementById(
+            "authScreen"
+        ).style.display = "none";
+
+
+        document.getElementById(
+            "app"
+        ).style.display = "block";
+
+    }
+
+
+    function mostrarTelaLogin() {
+
+        document.getElementById(
+            "authScreen"
+        ).style.display = "flex";
+
+
+        document.getElementById(
+            "app"
+        ).style.display = "none";
+
+    }
+
+
+    /* ==========================================================
+       LOGOUT
+    ========================================================== */
+
+    async function fazerLogout() {
+
+        const {
+            error
+        } = await supabaseClient.auth.signOut();
+
+
+        if (error) {
+
+            mostrarAviso(
+                "Erro ao sair."
+            );
+
+            return;
+
+        }
+
+
+        usuarioAtual = null;
+
+        window.allPosts = window.allPosts || [];
+
+        mostrarTelaLogin();
+
+        mostrarLogin();
+
+        document.getElementById(
+            "loginEmail"
+        ).value = "";
+
+        document.getElementById(
+            "loginPassword"
+        ).value = "";
+
+    }
+
+
+    /* ==========================================================
+       NAVEGAÇÃO
+    ========================================================== */
+
+    function mostrarPagina(pagina) {
+
+        document.querySelectorAll(
+            ".page"
+        ).forEach(
+            elemento =>
+                elemento.classList.remove("active")
+        );
+
+
+        document.querySelectorAll(
+            ".menu-item"
+        ).forEach(
+            elemento =>
+                elemento.classList.remove("active")
+        );
+
+
+        const page =
+            document.getElementById(
+                "page-" + pagina
+            );
+
+
+        if (page) {
+
+            page.classList.add("active");
+
+        }
+
+
+        const menu =
+            document.getElementById(
+                "menu-" + pagina
+            );
+
+
+        if (menu) {
+
+            menu.classList.add("active");
+
+        }
+
+
+        if (pagina === "perfil") {
+
+            renderProfile();
+
+        }
+
+    }
+
+
+    /* ==========================================================
+       PUBLICAR POST
+    ========================================================== */
+
+    async function publicarNovoPost() {
+
+        if (!usuarioAtual) {
+
+            mostrarAviso(
+                "Você precisa estar logado."
+            );
+
+            return;
+
+        }
+
+
+        const textarea =
+            document.getElementById(
+                "postText"
+            );
+
+
+        const texto =
+            textarea.value.trim();
+
+
+        if (!texto) {
+
+            mostrarAviso(
+                "Digite alguma coisa antes de publicar."
+            );
+
+            return;
+
+        }
+
+
+        const {
+            error
+        } = await supabaseClient
+            .from("posts")
+            .insert({
+
+                user_id:
+                    usuarioAtual.id,
+
+                content:
+                    texto,
+
+                name:
+                    usuarioAtual.name,
+
+                handle:
+                    "@" + usuarioAtual.username,
+
+                created_at:
+                    new Date().toISOString()
+
+            });
+
+
+        if (error) {
+
+            console.error(error);
+
+            mostrarAviso(
+                "Não foi possível publicar."
+            );
+
+            return;
+
+        }
+
+
+        textarea.value = "";
+
+        mostrarAviso(
+            "🥜 Publicação criada!"
+        );
+
+
+        carregarPosts();
+
+    }
+
+
+    /* ==========================================================
+       CARREGAR POSTS
+    ========================================================== */
+
+    async function carregarPosts() {
+
+        const {
+            data: posts,
+            error
+        } = await supabaseClient
+            .from("posts")
+            .select("*")
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
+            );
+
+
+        if (error) {
+
+            console.error(error);
+
+            document.getElementById(
+                "feed"
+            ).innerHTML = `
+
+                <div class="empty">
+
+                    <h3>
+                        ⚠️ Erro ao carregar publicações
+                    </h3>
+
+                    <p style="margin-top:10px;">
+                        Verifique as permissões da tabela posts.
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        window.allPosts =
+            posts || [];
+
+
+        renderFeed();
+
+    }
+
+
+    /* ==========================================================
+       FEED
+    ========================================================== */
+
+    function renderFeed() {
+
+        const feed =
+            document.getElementById(
+                "feed"
+            );
+
+
+        if (
+            window.allPosts.length === 0
+        ) {
+
+            feed.innerHTML = `
+
+                <div class="empty">
+
+                    <h3>
+                        🥜 Ainda não existem publicações.
+                    </h3>
+
+                    <p style="margin-top:8px;">
+                        Seja o primeiro a publicar!
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        feed.innerHTML =
+            window.allPosts
+                .map(
+                    post =>
+                        criarPostHTML(post)
+                )
+                .join("");
+
+    }
+
+
+    function criarPostHTML(post) {
+
+        const nome =
+            post.name ||
+            "Usuário";
+
+
+        const handle =
+            post.handle ||
+            "@usuario";
+
+
+        const data =
+            formatarData(
+                post.created_at
+            );
+
+
+        return `
+
+            <article
+                class="post"
+                id="post-${post.id}"
+            >
+
+                <div class="post-header">
+
+                    <div class="avatar">
+                        ${escaparHTML(
+                            nome
+                                .charAt(0)
+                                .toUpperCase()
+                        )}
+                    </div>
+
+
+                    <div class="post-user">
+
+                        <div class="post-name">
+                            ${escaparHTML(nome)}
+                        </div>
+
+                        <div class="post-handle">
+
+                            ${escaparHTML(handle)}
+
+                            ·
+
+                            <span class="post-date">
+                                ${data}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        class="post-options"
+                    >
+                        ⋯
+                    </button>
+
+                </div>
+
+
+                <div class="post-content">
+                    ${escaparHTML(
+                        post.content || ""
+                    )}
+                </div>
+
+
+                <div class="post-stats">
+
+                    👍
+                    <span>
+                        0 curtidas
+                    </span>
+
+                    ·
+
+                    <span>
+                        0 comentários
+                    </span>
+
+                </div>
+
+
+                <div class="post-actions">
+
+                    <button
+                        class="post-action"
+                        onclick="curtirPost('${post.id}')"
+                    >
+                        👍 Curtir
+                    </button>
+
+
+                    <button
+                        class="post-action"
+                        onclick="comentarPost('${post.id}')"
+                    >
+                        💬 Comentar
+                    </button>
+
+
+                    <button
+                        class="post-action"
+                        onclick="compartilharPost('${post.id}')"
+                    >
+                        ↗ Compartilhar
+                    </button>
+
+                </div>
+
+            </article>
+
+        `;
+
+    }
+
+
+    /* ==========================================================
+       PERFIL
+    ========================================================== */
+
+    function renderProfile() {
+
+        const container =
+            document.getElementById(
+                "profilePosts"
+            );
+
+
+        const meusPosts =
+            window.allPosts.filter(
+                post =>
+                    post.user_id ===
+                    usuarioAtual.id
+            );
+
+
+        if (
+            meusPosts.length === 0
+        ) {
+
+            container.innerHTML = `
+
+                <div class="empty">
+
+                    <h3>
+                        Você ainda não publicou nada.
+                    </h3>
+
+                    <p style="margin-top:8px;">
+                        Faça sua primeira publicação!
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        container.innerHTML =
+            meusPosts
+                .map(
+                    post =>
+                        criarPostHTML(post)
+                )
+                .join("");
+
+    }
+
+
+    /* ==========================================================
+       PESQUISA
+    ========================================================== */
+
+    function pesquisarPosts(valor) {
+
+        valor =
+            valor
+                .trim()
+                .toLowerCase();
+
+
+        if (!valor) {
+
+            renderFeed();
+
+            return;
+
+        }
+
+
+        const resultados =
+            window.allPosts.filter(
+                post => {
+
+                    const texto =
+                        (
+                            post.content ||
+                            ""
+                        ).toLowerCase();
+
+
+                    const nome =
+                        (
+                            post.name ||
+                            ""
+                        ).toLowerCase();
+
+
+                    const handle =
+                        (
+                            post.handle ||
+                            ""
+                        ).toLowerCase();
+
+
+                    return (
+                        texto.includes(valor) ||
+                        nome.includes(valor) ||
+                        handle.includes(valor)
+                    );
+
+                }
+            );
+
+
+        const feed =
+            document.getElementById(
+                "feed"
+            );
+
+
+        if (
+            resultados.length === 0
+        ) {
+
+            feed.innerHTML = `
+
+                <div class="empty">
+
+                    <h3>
+                        Nenhuma publicação encontrada.
+                    </h3>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        feed.innerHTML =
+            resultados
+                .map(
+                    post =>
+                        criarPostHTML(post)
+                )
+                .join("");
+
+    }
+
+
+    /* ==========================================================
+       AÇÕES
+    ========================================================== */
+
+    function curtirPost(id) {
+
+        mostrarAviso(
+            "👍 Curtida registrada visualmente."
+        );
+
+    }
+
+
+    function comentarPost(id) {
+
+        const texto =
+            prompt(
+                "Digite seu comentário:"
+            );
+
+
+        if (!texto) {
+            return;
+        }
+
+
+        mostrarAviso(
+            "💬 Comentário adicionado."
+        );
+
+    }
+
+
+    function compartilharPost(id) {
+
+        const url =
+            window.location.href.split("#")[0] +
+            "#post-" +
+            id;
+
+
+        if (
+            navigator.clipboard
+        ) {
+
+            navigator.clipboard.writeText(
+                url
+            );
+
+        }
+
+
+        mostrarAviso(
+            "🔗 Link copiado!"
+        );
+
+    }
+
+
+    /* ==========================================================
+       DATA
+    ========================================================== */
+
+    function formatarData(data) {
+
+        if (!data) {
+            return "agora";
+        }
+
+
+        return new Date(
+            data
+        ).toLocaleString(
+            "pt-BR",
+            {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+
+    }
+
+
+    /* ==========================================================
+       SEGURANÇA HTML
+    ========================================================== */
+
+    function escaparHTML(texto) {
+
+        return String(texto)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+
+    }
+
+
+    /* ==========================================================
+       ERROS SUPABASE
+    ========================================================== */
+
+    function traduzirErroSupabase(mensagem) {
+
+        const texto =
+            mensagem.toLowerCase();
+
+
+        if (
+            texto.includes(
+                "user already registered"
+            )
+        ) {
+
+            return "Este e-mail já possui uma conta.";
+
+        }
+
+
+        if (
+            texto.includes(
+                "invalid login credentials"
+            )
+        ) {
+
+            return "E-mail ou senha incorretos.";
+
+        }
+
+
+        if (
+            texto.includes(
+                "password should be at least"
+            )
+        ) {
+
+            return "A senha é muito curta.";
+
+        }
+
+
+        if (
+            texto.includes(
+                "email not confirmed"
+            )
+        ) {
+
+            return "Confirme seu e-mail antes de entrar.";
+
+        }
+
+
+        return mensagem;
+
+    }
+
+
+    /* ==========================================================
+       INICIALIZAÇÃO
+    ========================================================== */
+
+    async function iniciarSistema() {
+
+        if (!window.supabase || !supabaseClient) {
+            console.error("Supabase não foi carregado. Verifique o script do CDN.");
+            mostrarAviso("Erro ao carregar o Supabase. Recarregue a página.");
+            return;
+        }
+
+        /*
+         * Verifica se já existe uma sessão.
+         */
+
+        const {
+            data: {
+                session
+            }
+        } = await supabaseClient.auth.getSession();
+
+
+        if (session) {
+
+            await carregarUsuario();
+
+        } else {
+
+            mostrarTelaLogin();
+
+        }
+
+
+        /*
+         * Observa login/logout automaticamente.
+         */
+
+        supabaseClient.auth.onAuthStateChange(
+            async (event, session) => {
+
+                if (
+                    event === "SIGNED_OUT"
+                ) {
+
+                    mostrarTelaLogin();
+
+                    return;
+
+                }
+
+
+                if (
+                    event === "SIGNED_IN" &&
+                    session
+                ) {
+
+                    /*
+                     * Evita processamento duplicado
+                     * se já houver usuário.
+                     */
+
+                    if (!usuarioAtual) {
+
+                        await carregarUsuario();
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        iniciarSistema
+    );
+
+
+/* ================= PAÇOCA 2.0 ================= */
+var postImageFile=null, chatComUsuario=null, pacocaRealtime=null;
+function avatarHTML(p){ if(p&&p.avatar_url) return `<img src="${escaparHTML(p.avatar_url)}" alt="">`; return escaparHTML(((p&&p.name)||"?").charAt(0).toUpperCase()); }
+async function uploadImagem(file,pasta){
+ if(!file) return null;
+ if(file.size>6*1024*1024){mostrarAviso("A imagem deve ter no máximo 6 MB.");return null;}
+ const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
+ const path=`${usuarioAtual.id}/${pasta}-${Date.now()}.${ext}`;
+ const {error}=await supabaseClient.storage.from("pacoca-media").upload(path,file,{upsert:false,contentType:file.type});
+ if(error){console.error(error);mostrarAviso("Erro ao enviar imagem.");return null;}
+ return supabaseClient.storage.from("pacoca-media").getPublicUrl(path).data.publicUrl;
+}
+function prepararFotoPost(input){postImageFile=input.files&&input.files[0];if(!postImageFile)return;const u=URL.createObjectURL(postImageFile);document.getElementById("postPreviewImg").src=u;document.getElementById("postImagePreview").style.display="block";}
+function removerFotoPost(){postImageFile=null;document.getElementById("postImageInput").value="";document.getElementById("postImagePreview").style.display="none";}
+function alternarEditorPerfil(){const e=document.getElementById("profileEditor");e.style.display=e.style.display==="block"?"none":"block";document.getElementById("editName").value=usuarioAtual.name||"";document.getElementById("editBio").value=usuarioAtual.bio||"";}
+async function salvarPerfil(){
+ const name=document.getElementById("editName").value.trim(),bio=document.getElementById("editBio").value.trim();
+ if(!name)return mostrarAviso("Digite seu nome.");
+ const {error}=await supabaseClient.from("profiles").update({name,bio,updated_at:new Date().toISOString()}).eq("id",usuarioAtual.id);
+ if(error){console.error(error);return mostrarAviso("Não foi possível salvar o perfil.");}
+ usuarioAtual.name=name;usuarioAtual.bio=bio;atualizarInterfaceUsuario();alternarEditorPerfil();mostrarAviso("Perfil atualizado!");
+}
+async function alterarImagemPerfil(input,tipo){
+ const file=input.files&&input.files[0]; if(!file)return;
+ mostrarAviso("Enviando imagem...");
+ const url=await uploadImagem(file,tipo); if(!url)return;
+ const campo=tipo==="avatar"?"avatar_url":"cover_url";
+ const {error}=await supabaseClient.from("profiles").update({[campo]:url,updated_at:new Date().toISOString()}).eq("id",usuarioAtual.id);
+ if(error){console.error(error);return mostrarAviso("Não foi possível atualizar a imagem.");}
+ usuarioAtual[campo]=url;atualizarInterfaceUsuario();mostrarAviso(tipo==="avatar"?"Foto de perfil atualizada!":"Capa atualizada!");
+}
+const _carregarUsuario=carregarUsuario;
+carregarUsuario=async function(){
+ const {data:{user},error}=await supabaseClient.auth.getUser(); if(error||!user){mostrarTelaLogin();return;}
+ let {data:profile}=await supabaseClient.from("profiles").select("*").eq("id",user.id).maybeSingle();
+ if(!profile){const nome=user.user_metadata?.name||user.email.split("@")[0],username=user.user_metadata?.username||user.email.split("@")[0].toLowerCase().replace(/[^a-z0-9_]/g,"");const r=await supabaseClient.from("profiles").upsert({id:user.id,name:nome,username,email:user.email}).select().single();profile=r.data||{id:user.id,name:nome,username,email:user.email};}
+ usuarioAtual={id:user.id,email:user.email,name:profile.name||"Usuário",username:profile.username||"usuario",bio:profile.bio||"",avatar_url:profile.avatar_url||"",cover_url:profile.cover_url||""};
+ atualizarInterfaceUsuario();mostrarAplicacao();await carregarPosts();carregarSugestoes();iniciarRealtime();
+};
+const _atualizarInterfaceUsuario=atualizarInterfaceUsuario;
+atualizarInterfaceUsuario=function(){
+ if(!usuarioAtual)return;
+ const top=document.getElementById("topAvatar"),pa=document.getElementById("profileAvatar");
+ top.innerHTML=avatarHTML(usuarioAtual);pa.innerHTML=avatarHTML(usuarioAtual);
+ document.getElementById("topUserName").textContent=usuarioAtual.name;
+ document.getElementById("profileName").textContent=usuarioAtual.name;
+ document.getElementById("profileHandle").textContent="@"+usuarioAtual.username;
+ document.getElementById("profileBio").textContent=usuarioAtual.bio||"Bem-vindo ao meu perfil na Paçoca! 🥜";
+ const c=document.getElementById("profileCover"); if(c)c.style.backgroundImage=usuarioAtual.cover_url?`url("${usuarioAtual.cover_url}")`:"";
+};
+const _publicarNovoPost=publicarNovoPost;
+publicarNovoPost=async function(){
+ if(!usuarioAtual)return mostrarAviso("Você precisa estar logado.");
+ const ta=document.getElementById("postText"),texto=ta.value.trim();
+ if(!texto&&!postImageFile)return mostrarAviso("Escreva algo ou escolha uma foto.");
+ let image_url=null;if(postImageFile){mostrarAviso("Enviando publicação...");image_url=await uploadImagem(postImageFile,"post");if(!image_url)return;}
+ const {error}=await supabaseClient.from("posts").insert({user_id:usuarioAtual.id,content:texto,name:usuarioAtual.name,handle:"@"+usuarioAtual.username,image_url,created_at:new Date().toISOString()});
+ if(error){console.error(error);return mostrarAviso("Não foi possível publicar.");}
+ ta.value="";removerFotoPost();mostrarAviso("🥜 Publicação criada!");carregarPosts();
+};
+const _carregarPosts=carregarPosts;
+carregarPosts=async function(){
+ const {data:posts,error}=await supabaseClient.from("posts").select("*").order("created_at",{ascending:false});
+ if(error){console.error(error);document.getElementById("feed").innerHTML='<div class="empty">⚠️ Erro ao carregar publicações.</div>';return;}
+ const ids=(posts||[]).map(p=>p.id);
+ let likes=[],comments=[],profiles=[];
+ if(ids.length){likes=(await supabaseClient.from("post_likes").select("*").in("post_id",ids)).data||[];comments=(await supabaseClient.from("comments").select("*").in("post_id",ids).order("created_at",{ascending:true})).data||[];}
+ const uids=[...new Set([...(posts||[]).map(p=>p.user_id),...comments.map(c=>c.user_id)])].filter(Boolean);
+ if(uids.length)profiles=(await supabaseClient.from("profiles").select("id,name,username,avatar_url").in("id",uids)).data||[];
+ const pm=Object.fromEntries(profiles.map(p=>[p.id,p]));
+ window.allPosts=(posts||[]).map(p=>({...p,_likes:likes.filter(l=>l.post_id===p.id),_comments:comments.filter(c=>c.post_id===p.id).map(c=>({...c,_profile:pm[c.user_id]})),_profile:pm[p.user_id]}));
+ renderFeed();if(document.getElementById("page-perfil").classList.contains("active"))renderProfile();
+};
+criarPostHTML=function(post){
+ const p=post._profile||{},nome=p.name||post.name||"Usuário",handle="@"+(p.username||String(post.handle||"usuario").replace(/^@/,""));
+ const likes=post._likes||[],comments=post._comments||[],liked=likes.some(l=>l.user_id===usuarioAtual?.id),owner=post.user_id===usuarioAtual?.id;
+ const img=post.image_url?`<img class="post-image" src="${escaparHTML(post.image_url)}" alt="Foto da publicação">`:"";
+ const cs=comments.map(c=>`<div class="comment"><div class="avatar">${avatarHTML(c._profile)}</div><div class="comment-bubble"><b>${escaparHTML(c._profile?.name||"Usuário")}</b><br>${escaparHTML(c.content||"")}</div></div>`).join("");
+ return `<article class="post" id="post-${post.id}"><div class="post-header"><div class="avatar click-profile" onclick="abrirPerfilUsuario('${post.user_id}')">${avatarHTML({...p,name})}</div><div class="post-user"><div class="post-name click-profile" onclick="abrirPerfilUsuario('${post.user_id}')">${escaparHTML(nome)}</div><div class="post-handle">${escaparHTML(handle)} · <span class="post-date">${formatarData(post.created_at)}</span></div></div>${owner?`<div class="post-owner-actions"><button class="post-options" onclick="alternarMenuPost('${post.id}')">⋯</button><div class="post-menu" id="menu-${post.id}"><button onclick="editarPost('${post.id}')">✏️ Editar</button><button onclick="excluirPost('${post.id}')">🗑️ Excluir</button></div></div>`:""}</div><div class="post-content">${escaparHTML(post.content||"")}</div>${img}<div class="post-stats">👍 <span>${likes.length} curtida${likes.length===1?"":"s"}</span> · <span>${comments.length} comentário${comments.length===1?"":"s"}</span></div><div class="post-actions"><button class="post-action ${liked?"liked":""}" onclick="curtirPost('${post.id}')">👍 ${liked?"Curtido":"Curtir"}</button><button class="post-action" onclick="focarComentario('${post.id}')">💬 Comentar</button><button class="post-action" onclick="compartilharPost('${post.id}')">↗ Compartilhar</button></div><div class="comments-box">${cs}<div class="comment-form"><input id="comment-${post.id}" placeholder="Escreva um comentário..." onkeydown="if(event.key==='Enter') comentarPost('${post.id}')"><button class="pacoca-btn" onclick="comentarPost('${post.id}')">Enviar</button></div></div></article>`;
+};
+curtirPost=async function(id){
+ const post=window.allPosts.find(p=>String(p.id)===String(id));const liked=post?._likes?.some(l=>l.user_id===usuarioAtual.id);
+ const r=liked?await supabaseClient.from("post_likes").delete().eq("post_id",id).eq("user_id",usuarioAtual.id):await supabaseClient.from("post_likes").insert({post_id:id,user_id:usuarioAtual.id});
+ if(r.error){console.error(r.error);return mostrarAviso("Não foi possível registrar a curtida.");}carregarPosts();
+};
+function focarComentario(id){document.getElementById("comment-"+id)?.focus();}
+comentarPost=async function(id){const i=document.getElementById("comment-"+id),texto=i?.value.trim();if(!texto)return;const {error}=await supabaseClient.from("comments").insert({post_id:id,user_id:usuarioAtual.id,content:texto});if(error){console.error(error);return mostrarAviso("Não foi possível comentar.");}i.value="";carregarPosts();}
+function alternarMenuPost(id){const m=document.getElementById("menu-"+id);if(m)m.style.display=m.style.display==="block"?"none":"block";}
+async function editarPost(id){const p=window.allPosts.find(x=>String(x.id)===String(id));if(!p)return;const t=prompt("Editar publicação:",p.content||"");if(t===null)return;const {error}=await supabaseClient.from("posts").update({content:t.trim()}).eq("id",id).eq("user_id",usuarioAtual.id);if(error)return mostrarAviso("Não foi possível editar.");carregarPosts();}
+async function excluirPost(id){if(!confirm("Excluir esta publicação?"))return;const {error}=await supabaseClient.from("posts").delete().eq("id",id).eq("user_id",usuarioAtual.id);if(error)return mostrarAviso("Não foi possível excluir.");mostrarAviso("Publicação excluída.");carregarPosts();}
+async function pesquisarUsuarios(){
+ const q=document.getElementById("friendSearch").value.trim().replace(/^@/,"");if(!q)return carregarAmigos("amigos");
+ const {data,error}=await supabaseClient.from("profiles").select("id,name,username,avatar_url,bio").neq("id",usuarioAtual.id).or(`username.ilike.%${q}%,name.ilike.%${q}%`).limit(20);
+ if(error){console.error(error);return mostrarAviso("Erro na pesquisa.");}renderPessoas(data||[],"pesquisa");
+}
+async function statusAmizade(other){
+ const {data}=await supabaseClient.from("friendships").select("*").or(`and(requester_id.eq.${usuarioAtual.id},addressee_id.eq.${other}),and(requester_id.eq.${other},addressee_id.eq.${usuarioAtual.id})`).maybeSingle();return data;
+}
+async function renderPessoas(pessoas,modo){
+ const c=document.getElementById("friendsContent");if(!pessoas.length){c.innerHTML='<div class="empty">Nenhuma pessoa encontrada.</div>';return;}
+ const cards=[];for(const p of pessoas){let f=await statusAmizade(p.id),acoes="";
+ if(!f)acoes=`<button class="pacoca-btn" onclick="enviarAmizade('${p.id}')">Adicionar</button>`;
+ else if(f.status==="accepted")acoes=`<button class="pacoca-btn" onclick="abrirChat('${p.id}','${escaparHTML(p.name)}')">💬 Mensagem</button>`;
+ else if(f.addressee_id===usuarioAtual.id)acoes=`<button class="pacoca-btn" onclick="responderAmizade('${f.id}',true)">Aceitar</button><button class="pacoca-btn alt" onclick="responderAmizade('${f.id}',false)">Recusar</button>`;
+ else acoes=`<button class="pacoca-btn alt" disabled>Solicitação enviada</button>`;
+ cards.push(`<div class="person"><div class="avatar click-profile" onclick="abrirPerfilUsuario('${p.id}')">${avatarHTML(p)}</div><div class="person-info"><div class="person-name click-profile" onclick="abrirPerfilUsuario('${p.id}')">${escaparHTML(p.name||"Usuário")}</div><div class="person-detail">@${escaparHTML(p.username||"usuario")}${p.bio?" · "+escaparHTML(p.bio):""}</div></div><div class="person-actions">${acoes}</div></div>`);}
+ c.innerHTML=`<div class="side-card">${cards.join("")}</div>`;
+}
+async function carregarAmigos(tipo="amigos",btn){
+ if(btn){document.querySelectorAll(".friend-tab").forEach(x=>x.classList.remove("active"));btn.classList.add("active");}
+ const {data,error}=await supabaseClient.from("friendships").select("*").or(`requester_id.eq.${usuarioAtual.id},addressee_id.eq.${usuarioAtual.id}`);
+ if(error){console.error(error);return;}
+ let fs=data||[];if(tipo==="amigos")fs=fs.filter(f=>f.status==="accepted");if(tipo==="recebidas")fs=fs.filter(f=>f.status==="pending"&&f.addressee_id===usuarioAtual.id);if(tipo==="enviadas")fs=fs.filter(f=>f.status==="pending"&&f.requester_id===usuarioAtual.id);
+ const ids=fs.map(f=>f.requester_id===usuarioAtual.id?f.addressee_id:f.requester_id);if(!ids.length){document.getElementById("friendsContent").innerHTML='<div class="empty">Nada por aqui ainda.</div>';return;}
+ const {data:ps}=await supabaseClient.from("profiles").select("id,name,username,avatar_url,bio").in("id",ids);await renderPessoas(ps||[],tipo);
+}
+async function enviarAmizade(id){const {error}=await supabaseClient.from("friendships").insert({requester_id:usuarioAtual.id,addressee_id:id,status:"pending"});if(error){console.error(error);return mostrarAviso("Não foi possível enviar a solicitação.");}mostrarAviso("Solicitação enviada!");pesquisarUsuarios();carregarSugestoes();}
+async function responderAmizade(id,aceitar){const q=aceitar?supabaseClient.from("friendships").update({status:"accepted",responded_at:new Date().toISOString()}).eq("id",id).eq("addressee_id",usuarioAtual.id):supabaseClient.from("friendships").delete().eq("id",id).eq("addressee_id",usuarioAtual.id);const {error}=await q;if(error)return mostrarAviso("Não foi possível responder.");mostrarAviso(aceitar?"Agora vocês são amigos!":"Solicitação recusada.");carregarAmigos("recebidas");carregarSugestoes();}
+async function carregarSugestoes(){
+ if(!usuarioAtual)return;const {data}=await supabaseClient.from("profiles").select("id,name,username,avatar_url").neq("id",usuarioAtual.id).limit(5);const box=document.getElementById("suggestionsContent");if(!box)return;
+ let html="";for(const p of data||[]){const f=await statusAmizade(p.id);if(f)continue;html+=`<div class="person"><div class="avatar click-profile" onclick="abrirPerfilUsuario('${p.id}')">${avatarHTML(p)}</div><div class="person-info"><div class="person-name click-profile" onclick="abrirPerfilUsuario('${p.id}')">${escaparHTML(p.name)}</div><div class="person-detail">@${escaparHTML(p.username)}</div></div><button class="add-button" onclick="enviarAmizade('${p.id}')">+</button></div>`;}box.innerHTML=html||'<div style="padding:12px;color:#777">Sem novas sugestões.</div>';
+ const {data:pend}=await supabaseClient.from("friendships").select("id").eq("addressee_id",usuarioAtual.id).eq("status","pending");document.getElementById("friendBadge").innerHTML=pend?.length?`<span class="badge">${pend.length}</span>`:"";
+}
+async function contatosChat(){
+ const {data}=await supabaseClient.from("friendships").select("*").eq("status","accepted").or(`requester_id.eq.${usuarioAtual.id},addressee_id.eq.${usuarioAtual.id}`);const ids=(data||[]).map(f=>f.requester_id===usuarioAtual.id?f.addressee_id:f.requester_id);
+ const {data:ps}=ids.length?await supabaseClient.from("profiles").select("id,name,username,avatar_url").in("id",ids):{data:[]};const box=document.getElementById("chatContacts");box.innerHTML=(ps||[]).map(p=>`<div class="chat-contact" onclick="abrirChat('${p.id}','${escaparHTML(p.name)}')"><b>${escaparHTML(p.name)}</b><br><small>@${escaparHTML(p.username)}</small></div>`).join("")||'<div class="empty">Adicione amigos para conversar.</div>';
+}
+async function abrirChat(id,nome){chatComUsuario=id;mostrarPagina("mensagens");document.getElementById("chatHead").textContent=nome||"Conversa";await carregarMensagens();}
+async function carregarMensagens(){
+ if(!chatComUsuario)return contatosChat();const {data,error}=await supabaseClient.from("messages").select("*").or(`and(sender_id.eq.${usuarioAtual.id},receiver_id.eq.${chatComUsuario}),and(sender_id.eq.${chatComUsuario},receiver_id.eq.${usuarioAtual.id})`).order("created_at",{ascending:true});
+ if(error){console.error(error);return;}const box=document.getElementById("chatMessages");box.innerHTML=(data||[]).map(m=>`<div class="msg ${m.sender_id===usuarioAtual.id?"mine":""}">${m.content?escaparHTML(m.content):""}${m.image_url?`<img class="msg-image" src="${escaparHTML(m.image_url)}" alt="Foto enviada" onclick="window.open(this.src,'_blank')">`:""}<div class="msg-time">${formatarData(m.created_at)}</div></div>`).join("")||'<div class="empty">Nenhuma mensagem ainda. Diga oi! 👋</div>';box.scrollTop=box.scrollHeight;
+ await supabaseClient.from("messages").update({read_at:new Date().toISOString()}).eq("sender_id",chatComUsuario).eq("receiver_id",usuarioAtual.id).is("read_at",null);
+}
+async function enviarMensagem(){if(!chatComUsuario)return mostrarAviso("Selecione um amigo.");const i=document.getElementById("messageInput"),t=i.value.trim();if(!t)return;const {error}=await supabaseClient.from("messages").insert({sender_id:usuarioAtual.id,receiver_id:chatComUsuario,content:t});if(error){console.error(error);return mostrarAviso("Não foi possível enviar.");}i.value="";carregarMensagens();}
+async function enviarFotoChat(input){
+ if(!chatComUsuario){input.value="";return mostrarAviso("Selecione um amigo.");}
+ const file=input.files&&input.files[0];if(!file)return;
+ mostrarAviso("Enviando foto...");
+ const url=await uploadImagem(file,"chat");input.value="";if(!url)return;
+ const {error}=await supabaseClient.from("messages").insert({sender_id:usuarioAtual.id,receiver_id:chatComUsuario,content:"",image_url:url});
+ if(error){console.error(error);return mostrarAviso("Não foi possível enviar a foto. Execute a atualização SQL das mensagens.");}
+ mostrarAviso("Foto enviada!");carregarMensagens();
+}
+async function abrirPerfilUsuario(id){
+ if(!id)return;if(id===usuarioAtual.id){mostrarPagina("perfil");return;}
+ const {data:p,error}=await supabaseClient.from("profiles").select("id,name,username,bio,avatar_url,cover_url").eq("id",id).maybeSingle();
+ if(error||!p){console.error(error);return mostrarAviso("Não foi possível abrir este perfil.");}
+ document.querySelectorAll(".page").forEach(e=>e.classList.remove("active"));document.querySelectorAll(".menu-item").forEach(e=>e.classList.remove("active"));
+ document.getElementById("page-perfil-publico").classList.add("active");
+ document.getElementById("publicProfileAvatar").innerHTML=avatarHTML(p);document.getElementById("publicProfileName").textContent=p.name||"Usuário";document.getElementById("publicProfileHandle").textContent="@"+(p.username||"usuario");document.getElementById("publicProfileBio").textContent=p.bio||"";
+ const c=document.getElementById("publicProfileCover");c.style.backgroundImage=p.cover_url?`url("${p.cover_url}")`:"";
+ const f=await statusAmizade(id);let a="";if(!f)a=`<button class="pacoca-btn" onclick="enviarAmizade('${id}')">Adicionar amigo</button>`;else if(f.status==="accepted")a=`<button class="pacoca-btn" onclick="abrirChat('${id}','${escaparHTML(p.name||"Usuário")}')">💬 Mensagem</button>`;else if(f.addressee_id===usuarioAtual.id)a=`<button class="pacoca-btn" onclick="responderAmizade('${f.id}',true);abrirPerfilUsuario('${id}')">Aceitar amizade</button>`;else a=`<button class="pacoca-btn alt" disabled>Solicitação enviada</button>`;document.getElementById("publicProfileActions").innerHTML=a;
+ const posts=window.allPosts.filter(x=>x.user_id===id);document.getElementById("publicProfilePosts").innerHTML=posts.length?posts.map(criarPostHTML).join(""):'<div class="empty">Este usuário ainda não publicou nada.</div>';
+}
+async function carregarNotificacoes(){
+ const {data:fs}=await supabaseClient.from("friendships").select("id,requester_id,created_at,status").eq("addressee_id",usuarioAtual.id).order("created_at",{ascending:false}).limit(20);
+ const ids=[...new Set((fs||[]).map(f=>f.requester_id))];const {data:ps}=ids.length?await supabaseClient.from("profiles").select("id,name").in("id",ids):{data:[]};const pm=Object.fromEntries((ps||[]).map(p=>[p.id,p]));
+ const box=document.getElementById("notificationsContent");box.innerHTML=(fs||[]).map(f=>`<div class="notification-item">👥 <b>${escaparHTML(pm[f.requester_id]?.name||"Alguém")}</b> ${f.status==="pending"?"enviou uma solicitação de amizade.":"agora é seu amigo."}<br><small>${formatarData(f.created_at)}</small></div>`).join("")||'<div class="empty">Nenhuma notificação.</div>';
+}
+function carregarFotos(){const imgs=window.allPosts.filter(p=>p.image_url);document.getElementById("photosContent").innerHTML=imgs.map(p=>`<img src="${escaparHTML(p.image_url)}" alt="Foto">`).join("")||'<div class="empty" style="grid-column:1/-1">Nenhuma foto publicada ainda.</div>';}
+const _mostrarPagina=mostrarPagina;
+mostrarPagina=function(pagina){_mostrarPagina(pagina);if(pagina==="amigos")carregarAmigos();if(pagina==="mensagens")contatosChat();if(pagina==="notificacoes")carregarNotificacoes();if(pagina==="fotos")carregarFotos();};
+function iniciarRealtime(){
+ if(pacocaRealtime)supabaseClient.removeChannel(pacocaRealtime);
+ pacocaRealtime=supabaseClient.channel("pacoca-live").on("postgres_changes",{event:"*",schema:"public",table:"messages"},()=>{if(document.getElementById("page-mensagens").classList.contains("active"))carregarMensagens();}).on("postgres_changes",{event:"*",schema:"public",table:"friendships"},()=>{carregarSugestoes();if(document.getElementById("page-amigos").classList.contains("active"))carregarAmigos();}).on("postgres_changes",{event:"*",schema:"public",table:"posts"},()=>carregarPosts()).subscribe();
+}
+
+
+</script>
+
+</body>
+</html>
